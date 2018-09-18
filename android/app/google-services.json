@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "875306170458",
+    "firebase_url": "https://mm-leavemanagement.firebaseio.com",
+    "project_id": "mm-leavemanagement",
+    "storage_bucket": "mm-leavemanagement.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875306170458:android:521243e2ee4378c3",
+        "android_client_info": {
+          "package_name": "com.mayandro.fluttermmhrmangement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "875306170458-9bquuftsgvuhggflvprrkse07srpljh0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mayandro.fluttermmhrmangement",
+            "certificate_hash": "e00e204b7603724371f1522c0309ab1745559ef0"
+          }
+        },
+        {
+          "client_id": "875306170458-hp5gga11929tl9a86aq6u7nrepdjle1e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTO0JzVqdHov-zkwckSFmULNNxBLDdGXI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "875306170458-hp5gga11929tl9a86aq6u7nrepdjle1e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
