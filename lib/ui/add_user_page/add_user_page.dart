@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -82,19 +80,25 @@ class _AddUserPageState extends State<AddUserPage>
   Widget build(BuildContext context) {
     return Scaffold(
         key: _globalKey,
-        appBar: new AppBar(
-          title: new Text("MM employee"),
+        appBar: AppBar(
+          elevation: 0.0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.black),
+          backgroundColor: Colors.white,
+          title: new Text(
+            "Add New Member",
+            style: TextStyle(color: Colors.black),
+          ),
         ),
         body: Stack(
           fit: StackFit.expand,
           children: <Widget>[
             Container(
-              color: Colors.white70,
+              color: Colors.white,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    createScreenTitleText(),
                     Form(
                         key: formKey,
                         child: new Column(
@@ -119,11 +123,11 @@ class _AddUserPageState extends State<AddUserPage>
                                       elevation: calculateElevation(),
                                       shape: new RoundedRectangleBorder(
                                           borderRadius:
-                                              new BorderRadius.circular(30.0)),
+                                          new BorderRadius.circular(30.0)),
                                       padding: EdgeInsets.all(0.0),
                                       color: _state == 2
-                                          ? Colors.green
-                                          : Colors.blue,
+                                          ? Colors.deepPurple
+                                          : Colors.black,
                                       child: buildButtonChild(),
                                       onPressed: () {
                                         //do the login
@@ -228,7 +232,7 @@ class _AddUserPageState extends State<AddUserPage>
     List<DropdownMenuItem<String>> items = new List();
     for (String authLevel in AUTHORITY_LEVEL_LIST) {
       items.add(
-          new DropdownMenuItem(value: authLevel, child: new Text(authLevel)));
+          new DropdownMenuItem(value: authLevel, child: Container(color: Colors.white,child: Text(authLevel))));
     }
     return items;
   }
@@ -243,15 +247,20 @@ class _AddUserPageState extends State<AddUserPage>
         ),
         isEmpty: _authLevel == '',
         child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: _authLevel,
-            isDense: true,
-            onChanged: (String newValue) {
-              setState(() {
-                _authLevel = newValue;
-              });
-            },
-            items: getDropDownMenuItemsForAuthLevel(),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              canvasColor: Colors.white,
+            ),
+            child: DropdownButton<String>(
+              value: _authLevel,
+              isDense: true,
+              onChanged: (String newValue) {
+                setState(() {
+                  _authLevel = newValue;
+                });
+              },
+              items: getDropDownMenuItemsForAuthLevel(),
+            ),
           ),
         ),
       ),
@@ -261,7 +270,7 @@ class _AddUserPageState extends State<AddUserPage>
   List<DropdownMenuItem<String>> getDropDownMenuItemsForDepartment() {
     List<DropdownMenuItem<String>> items = new List();
     for (String item in DEPARTMENT_LIST) {
-      items.add(new DropdownMenuItem(value: item, child: new Text(item)));
+      items.add(new DropdownMenuItem(value: item, child: Container(color: Colors.white,child: Text(item))));
     }
     return items;
   }
@@ -276,15 +285,20 @@ class _AddUserPageState extends State<AddUserPage>
         ),
         isEmpty: _department == '',
         child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: _department,
-            isDense: true,
-            onChanged: (String newValue) {
-              setState(() {
-                _department = newValue;
-              });
-            },
-            items: getDropDownMenuItemsForDepartment(),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              canvasColor: Colors.white,
+            ),
+            child: DropdownButton<String>(
+              value: _department,
+              isDense: true,
+              onChanged: (String newValue) {
+                setState(() {
+                  _department = newValue;
+                });
+              },
+              items: getDropDownMenuItemsForDepartment(),
+            ),
           ),
         ),
       ),
@@ -294,7 +308,7 @@ class _AddUserPageState extends State<AddUserPage>
   List<DropdownMenuItem<int>> getDropDownMenuItemsForNumberOfHoliday() {
     List<DropdownMenuItem<int>> items = new List();
     for (int i = 0; i < 27; i++) {
-      items.add(DropdownMenuItem(value: i, child: new Text('$i')));
+      items.add(DropdownMenuItem(value: i, child: Container(color: Colors.white,child: Text('$i'))));
     }
     return items;
   }
@@ -309,15 +323,20 @@ class _AddUserPageState extends State<AddUserPage>
         ),
         isEmpty: _numberOfHoliday == 21,
         child: DropdownButtonHideUnderline(
-          child: DropdownButton<int>(
-            value: _numberOfHoliday,
-            isDense: true,
-            onChanged: (int newValue) {
-              setState(() {
-                _numberOfHoliday = newValue;
-              });
-            },
-            items: getDropDownMenuItemsForNumberOfHoliday(),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              canvasColor: Colors.white,
+            ),
+            child: DropdownButton<int>(
+              value: _numberOfHoliday,
+              isDense: true,
+              onChanged: (int newValue) {
+                setState(() {
+                  _numberOfHoliday = newValue;
+                });
+              },
+              items: getDropDownMenuItemsForNumberOfHoliday(),
+            ),
           ),
         ),
       ),
@@ -380,7 +399,7 @@ class _AddUserPageState extends State<AddUserPage>
       ..addStatusListener((AnimationStatus state) {
         if (state == AnimationStatus.completed) {
           print("Animation completd");
-          Navigation.navigateTo(context, 'user_management',
+          Navigation.navigateTo(context, 'user_management',  replace: true,
               transition: TransitionType.fadeIn);
         }
       });

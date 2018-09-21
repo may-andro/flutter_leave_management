@@ -1,92 +1,146 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mm_hrmangement/components/Profile_Notification.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/ui/add_project_page/add_new_project_page.dart';
 import 'package:flutter_mm_hrmangement/ui/add_project_page/model/AddProjectBloc.dart';
 import 'package:flutter_mm_hrmangement/ui/add_project_page/model/AddProjectBlocProvider.dart';
+import 'package:flutter_mm_hrmangement/utility/constants.dart';
 
 class SelectUserForProjectPage extends StatefulWidget {
   @override
-  _SelectUserForProjectPageState createState() => _SelectUserForProjectPageState();
+  _SelectUserForProjectPageState createState() =>
+      _SelectUserForProjectPageState();
 }
 
 class _SelectUserForProjectPageState extends State<SelectUserForProjectPage> {
   List<User> selectedUserList = List();
+  bool isManagerSelected = false;
+  bool isLeadSelected = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return AddProjectBlocProvider(
       bloc: AddProjectBloc(),
       child: Scaffold(
-          appBar: new AppBar(
-            title: new Text(selectedUserList.length > 0
+          key: _scaffoldKey,
+          appBar: AppBar(
+            elevation: 0.0,
+            centerTitle: true,
+            iconTheme: IconThemeData(color: Colors.black),
+            backgroundColor: Colors.white,
+            title: Text(selectedUserList.length > 0
                 ? '${selectedUserList.length} members selected'
-                : 'Select team members'),
-            actions: <Widget>[
-              getMenuWidget()
-            ],
+                : 'Select team members',
+              style: TextStyle(color: Colors.black),),
+            actions: <Widget>[getMenuWidget()],
           ),
-          body: StreamBuilder(
-            stream: Firestore.instance.collection("userCollection").snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapShot) {
-              if (!snapShot.hasData) {
-                return FetchingDataWidget();
-              } else {
-                if (snapShot.hasError) {
-                  return ErrorInDataWidget();
-                } else {
-                  debugPrint('${selectedUserList.length}');
-                  return ListView.builder(
-                      itemCount: snapShot.data.documents.length,
-                      padding: const EdgeInsets.all(0.0),
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot ds = snapShot.data.documents[index];
-                        User user = User.fromJson(ds);
-                        return  UserListItem(
-                          user: user,
-                          isSelected: selectedUserList.contains(user),
-                          onTapUserItem: () {
-                            setState(() {
-                              if (selectedUserList.contains(user)) {
-                                selectedUserList.remove(user);
+          body:
+
+
+
+          Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Container(
+                color: Colors.white,
+                child: StreamBuilder(
+                  stream: Firestore.instance.collection("userCollection").snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapShot) {
+                    if (!snapShot.hasData) {
+                      return FetchingDataWidget();
+                    } else {
+                      if (snapShot.hasError) {
+                        return ErrorInDataWidget();
+                      } else {
+                        var map = Map<String, List<User>>();
+
+                        snapShot.data.documents.forEach((document) {
+                          User user = User.fromJson(document);
+                          if (map.containsKey(user.department)) {
+                            var list = map[user.department];
+                            list.add(user);
+                          } else {
+                            map.putIfAbsent(user.department, () => [user]);
+                          }
+                        });
+
+                        var headerList = [];
+                        map.forEach((designation, list) {
+                          headerList.add(designation);
+                          headerList.addAll(list);
+                        });
+
+                        return ListView.builder(
+                            itemCount: headerList.length,
+                            padding: const EdgeInsets.all(0.0),
+                            itemBuilder: (context, index) {
+                              var item = headerList[index];
+                              if (item is String) {
+                                return Padding(
+                                  padding: EdgeInsets.all(10.0),
+                                  child: Text(item),
+                                );
                               } else {
-                                selectedUserList.add(user);
+                                return UserListItem(
+                                  user: item,
+                                  isSelected: selectedUserList.contains(item),
+                                  onTapUserItem: () {
+                                    setState(() {
+                                      if (selectedUserList.contains(item)) {
+                                        if((item as User).department == DEPARTMENT_LIST[3]) isManagerSelected = false;
+                                        if((item as User).department == DEPARTMENT_LIST[4]) isLeadSelected = false;
+                                        selectedUserList.remove(item);
+                                      } else {
+                                        if((item as User).department == DEPARTMENT_LIST[3]) isManagerSelected = true;
+                                        if((item as User).department == DEPARTMENT_LIST[4]) isLeadSelected = true;
+                                        selectedUserList.add(item);
+                                      }
+                                    });
+                                  },
+                                );
                               }
                             });
-                          },
-                        );
-                      });
-                }
-              }
-            },
+                      }
+                    }
+                  },
+                ),
+              ),
+            ]
           )),
     );
   }
 
+  void showInSnackBar(String value) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(value)));
+  }
+
   Widget getMenuWidget() {
-    if (selectedUserList.isNotEmpty) {
-      return  IconButton(
+    return IconButton(
         icon: const Icon(Icons.people_outline),
         tooltip: 'Add Project',
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddNewProjectPage(teamList: selectedUserList),
-            ),
-          );
+          if(selectedUserList.isEmpty) {
+            showInSnackBar("No user selected");
+          } else if(!isLeadSelected) {
+            showInSnackBar("Team lead is required");
+          } else if(!isManagerSelected){
+            showInSnackBar("Manager is required");
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    AddNewProjectPage(teamList: selectedUserList),
+              ),
+            );
+          }
         });
-    } else {
-      return Padding(
-        padding: EdgeInsets.all(0.0),
-      );
-    }
   }
 }
 
 class UserListItem extends StatefulWidget {
-
   UserListItem({
     this.user,
     this.isSelected,
@@ -110,7 +164,8 @@ class _UserListItemState extends State<UserListItem> {
           height: 5.5,
         ),
         ListTile(
-          title: Text(widget.user.name,
+          title: Text(
+            widget.user.name,
             style: new TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.w400,
@@ -118,15 +173,17 @@ class _UserListItemState extends State<UserListItem> {
           ),
           subtitle: new Padding(
             padding: new EdgeInsets.only(top: 5.0),
-            child: new Text('${widget.user.department.substring(0,1)}',
+            child: new Text(
+              '${widget.user.department.substring(0, 1)}',
               style: new TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300),
             ),
           ),
           leading: CircleAvatar(
-            child: Text("${widget.user.name.substring(0, 2)}",
+            child: Text(
+              "${widget.user.name.substring(0, 2)}",
               style: TextStyle(color: Colors.white),
             ),
-            backgroundColor: Colors.pink,
+            backgroundColor: Colors.deepPurple,
           ),
           onTap: widget.onTapUserItem,
           selected: widget.isSelected,

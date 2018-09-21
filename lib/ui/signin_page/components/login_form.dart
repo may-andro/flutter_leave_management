@@ -7,9 +7,11 @@ import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/actions/actions.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
+import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginFormWidget extends StatefulWidget {
   @override
@@ -27,8 +29,8 @@ class _LoginFormState extends State<LoginFormWidget>
   final containerKey = new GlobalKey<ScaffoldState>();
   final formKey = new GlobalKey<FormState>();
 
-  String _mmid;
-  String _password;
+  String _mmid = "MM0007";
+  String _password = "1234";
 
   var _isPressed = false;
   var _animatingReveal = false;
@@ -118,14 +120,15 @@ class _LoginFormState extends State<LoginFormWidget>
             child:
 
             TextFormField(
-              validator: (val) => val.isEmpty ? 'Invalid mmid' : null,
+              initialValue: _mmid,
+              validator: (val) => val.isEmpty ? 'Invalid  mmid' : null,
               keyboardType: TextInputType.text,
               onSaved: (String val) {
                 _mmid = val;
               },
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Enter your mmid',
+                hintText: 'Enteryour mmid',
                 hintStyle: TextStyle(color: Colors.grey),
               ),
             ),
@@ -168,6 +171,7 @@ class _LoginFormState extends State<LoginFormWidget>
               child:
 
               TextFormField(
+                initialValue: _password,
                 obscureText: true,
                 validator: (val) =>
                 val.length == 0 ? 'Password invalid' : null,
@@ -227,7 +231,7 @@ class _LoginFormState extends State<LoginFormWidget>
               shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(30.0)),
               padding: EdgeInsets.all(0.0),
-              color: _state == 2 ? Colors.green : Colors.blue,
+              color: _state == 2 ? Colors.deepPurple : Colors.black,
               child: buildButtonChild(),
               onPressed: () {
                 //do the login
@@ -287,6 +291,10 @@ class _LoginFormState extends State<LoginFormWidget>
 
 
         User user = User.fromJson(userQuerySnapshot.documents[0]);
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString(LOGGED_IN_USER_PASSWORD, _password);
+        prefs.setString(LOGGED_IN_USER_MMID, _mmid);
 
         //login;
         callback(user);
@@ -359,7 +367,7 @@ class _LoginFormState extends State<LoginFormWidget>
       })
       ..addStatusListener((AnimationStatus state) {
         if (state == AnimationStatus.completed) {
-          Navigation.navigateTo(context, 'dashboard',
+          Navigation.navigateTo(context, 'home',  replace: true,
               transition: TransitionType.fadeIn);
         }
       });
@@ -377,4 +385,23 @@ enum LoginStatusStatus {
   loading,
   error,
   success,
+}
+
+void _showDialog(
+    BuildContext context, String message) {
+  var alert = AlertDialog(
+    title: Text("FCM DEMO"),
+    content: Text(message),
+    actions: <Widget>[
+      FlatButton(
+        color: Colors.transparent,
+        child: Text("Delete"),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      )
+    ],
+  );
+
+  showDialog(context: context, builder: (context) => alert);
 }

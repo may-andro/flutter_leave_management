@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
-import 'package:flutter_mm_hrmangement/components/ProgressHUD.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/loading_widget.dart';
+import 'package:flutter_mm_hrmangement/components/no_data_found_widget.dart';
 import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
-import 'package:flutter_mm_hrmangement/ui/project_management_page/components/list_item.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 
 class  ProjectManagementPage extends StatefulWidget {
   @override
@@ -18,8 +19,15 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(
-        title: new Text("Project Management"),
+      appBar: AppBar(
+        elevation: 0.0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: new Text(
+          "Project Management",
+          style: TextStyle(color: Colors.black),
+        ),
       ),
 
       body: Container(
@@ -32,6 +40,7 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
           Navigation.navigateTo(context, 'select_user_for_project', transition: TransitionType.inFromRight);
         },
         tooltip: 'Add new employee',
+        backgroundColor: Colors.black,
         child: new Icon(Icons.add),
       ),
     );
@@ -49,10 +58,10 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
       stream: Firestore.instance.collection("projectCollection").snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapShot) {
         if (!snapShot.hasData) {
-          return FetchingDataWidget();
+          return LoadingWidget("Fetching data");
         } else {
           if (snapShot.hasError) {
-            return ErrorInDataWidget();
+            return NoDataFoundWidget("No data found");
           } else {
             return ListView.builder(
                 itemCount: snapShot.data.documents.length,
@@ -116,7 +125,7 @@ class _UserListItemState extends State<UserListItem> {
             child: Text("${widget.project.name.substring(0, 2)}",
               style: TextStyle(color: Colors.white),
             ),
-            backgroundColor: Colors.pink,
+            backgroundColor: Colors.deepPurple,
           ),
           onTap: widget.onTapUserItem,
         )
@@ -124,32 +133,3 @@ class _UserListItemState extends State<UserListItem> {
     );
   }
 }
-
-class FetchingDataWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Center(
-        child: Text(
-          "Getting data",
-          style: TextStyle(color: Colors.deepOrange),
-        ),
-      ),
-    );
-  }
-}
-
-class ErrorInDataWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Center(
-        child: Text(
-          "Error data",
-          style: TextStyle(color: Colors.deepOrange),
-        ),
-      ),
-    );
-  }
-}
-

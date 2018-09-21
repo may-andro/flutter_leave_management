@@ -22,8 +22,15 @@ class _PublicHolidayPageState extends State<PublicHolidayPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text("Public Holiday"),
+      appBar: AppBar(
+        elevation: 0.0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: new Text(
+          "Public Holidays",
+          style: TextStyle(color: Colors.black),
+        ),
       ),
       body: Container(
         color: Colors.white,
@@ -36,11 +43,11 @@ class _PublicHolidayPageState extends State<PublicHolidayPage> {
           converter: (Store<AppState> store) => _ViewModel.fromStore(store),
           builder: (BuildContext context, _ViewModel viewModel) {
             return IgnorePointer(
-              ignoring: (viewModel.user.authLevel == AUTHORITY_LEVEL_LIST[1]),
+              ignoring: (viewModel.user.authLevel != AUTHORITY_LEVEL_LIST[1]),
               child: Opacity(
                 opacity: (viewModel.user.authLevel == AUTHORITY_LEVEL_LIST[1]) ? 1.0 : 0.0,
                 child: FloatingActionButton(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.black,
                   onPressed: () {
                     Navigation.navigateTo(context, 'add_public_holiday',
                         transition: TransitionType.fadeIn);

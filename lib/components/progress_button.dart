@@ -46,7 +46,7 @@ class _ProgressButtonState extends State<ProgressButton> with TickerProviderStat
         shape: new RoundedRectangleBorder(
             borderRadius: new BorderRadius.circular(30.0)),
         padding: EdgeInsets.all(0.0),
-        color: _state == 2 ? Colors.green : Colors.blue,
+        color: _state == 2 ? Colors.deepPurple : Colors.black,
         child: buildButtonChild(),
         onPressed: () {
           setState(() {

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mm_hrmangement/ui/add_project_page/select_user_for_project_page.dart';
 import 'package:flutter_mm_hrmangement/ui/add_public_holiday_page/add_public_holiday_page.dart';
 import 'package:flutter_mm_hrmangement/ui/add_user_page/add_user_page.dart';
-import 'package:flutter_mm_hrmangement/ui/dashboard_page/home_page.dart';
-import 'package:flutter_mm_hrmangement/ui/leave_request_page/leave_request_page.dart';
+import 'package:flutter_mm_hrmangement/ui/approve_leave_request/approve_leave_page.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/home_page.dart';
+import 'package:flutter_mm_hrmangement/ui/leave_request_page/user_leave_request_page.dart';
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/onboarding_page.dart';
 import 'package:flutter_mm_hrmangement/ui/project_management_page/project_management_page.dart';
 import 'package:flutter_mm_hrmangement/ui/public_holiday_page/public_hoilday_page.dart';
@@ -18,15 +19,15 @@ class Navigation {
     router = Router()
       ..define('/', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-        return OnBoardingPage();
-      }))
+            return OnBoardingPage();
+          }))
       ..define('signin', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-        return SignInPage();
-      }))
-      ..define('dashboard', handler: Handler(
+            return SignInPage();
+          }))
+      ..define('home', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-            return DashboardPage(title: 'Dashboard');
+            return HomePage();
           }))
       ..define('project_management', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
@@ -52,20 +53,25 @@ class Navigation {
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
             return AddPublicHolidayPage();
           }))
+      ..define('approve_leave', handler: Handler(
+          handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+            return ApproveLeavePage();
+          }))
       ..define('leave_request', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-        return LeaveRequestPage();
-      }));
+            return LeaveRequestPage();
+          }));
+
   }
 
   static void navigateTo(
-    BuildContext context,
-    String path, {
-    bool replace = false,
-    TransitionType transition = TransitionType.native,
-    Duration transitionDuration = const Duration(milliseconds: 250),
-    RouteTransitionsBuilder transitionBuilder,
-  }) {
+      BuildContext context,
+      String path, {
+        bool replace = false,
+        TransitionType transition = TransitionType.native,
+        Duration transitionDuration = const Duration(milliseconds: 250),
+        RouteTransitionsBuilder transitionBuilder,
+      }) {
     router.navigateTo(
       context,
       path,

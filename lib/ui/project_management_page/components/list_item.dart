@@ -33,7 +33,7 @@ class ListData extends StatelessWidget {
           leading: CircleAvatar(
             child: Text("Jan",
             style: TextStyle( color: Colors.white),),
-            backgroundColor: Colors.pink,
+            backgroundColor: Colors.black,
           ),
 
           trailing: IconButton(

@@ -4,7 +4,11 @@ import 'package:flutter_mm_hrmangement/ui/onboarding_page/components/dot_indicat
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/components/onboarding_item_widget.dart';
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/model/IntroModel.dart';
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/utility/page_transformer.dart';
+import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:async';
 
 class OnBoardingPage extends StatefulWidget {
   @override
@@ -103,7 +107,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               color: Colors.blue,
               child: Text("Get Started"),
               onPressed: () {
-                Navigation.navigateTo(context, 'signin',
+                setOnboardingFinished();
+                Navigation.navigateTo(context, 'signin', replace: true,
                     transition: TransitionType.fadeIn);
               },
               onHighlightChanged: (isPressed) {},
@@ -114,5 +119,11 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     } else {
       return Container();
     }
+  }
+
+  void setOnboardingFinished() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(ONBOARDING_FINISHED, true);
+
   }
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/text_label_widget.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
@@ -59,7 +60,7 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
   Widget buildButtonChild() {
     if (_state == 0) {
       return Text(
-        'Login',
+        'Add Project',
         style: TextStyle(color: Colors.white, fontSize: 16.0),
       );
     } else if (_state == 1) {
@@ -100,7 +101,7 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
       ..addStatusListener((AnimationStatus state) {
         if (state == AnimationStatus.completed) {
           print("Animation completd");
-          Navigation.navigateTo(context, 'project_management', transition: TransitionType.inFromRight);
+          Navigation.navigateTo(context, 'project_management',  replace: true, transition: TransitionType.inFromRight);
         }
       });
     _controllerReveal.forward();
@@ -123,8 +124,16 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
     });
 
     List usserMmidList = [];
+    List managerList = [];
+    List leadList = [];
     widget.teamList.forEach( (user) {
       usserMmidList.add(user.mmid);
+      if(user.department == "Manager") {
+        managerList.add(user.name);
+      }
+      if(user.department == "Software Developer Lead") {
+        leadList.add(user.name);
+      }
     });
 
     debugPrint('${usserMmidList}');
@@ -132,7 +141,9 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
         .document('$_projectName')
         .setData({
       "name": "$_projectName",
-      'team': usserMmidList})
+      'team': usserMmidList,
+      'lead': leadList,
+      'manager': managerList})
         .then((string) {
       setState(() {
         _state = 2;
@@ -150,14 +161,21 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        appBar: new AppBar(
-          title: new Text("Add new name to the project."),
+        appBar:AppBar(
+          elevation: 0.0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.black),
+          backgroundColor: Colors.white,
+          title: new Text(
+            "Create Project",
+            style: TextStyle(color: Colors.black),
+          ),
         ),
         body: Stack(
           fit: StackFit.expand,
           children: <Widget>[
             Container(
-              color: Colors.white70,
+              color: Colors.white,
               child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
@@ -167,80 +185,77 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
                         key: _formKey,
                         child: Column(
                           children: <Widget>[
-
-
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                            ),
-
-
-                            new Text(
-                              "Add new project?",
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
-                              style: new TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: 0.5,
-                                  color: Colors.black38,
-                                  fontSize: 18.0),
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                TextLabelWidget('Project Name', Colors.white, Colors.deepPurple, () {}),
+                                TextLabelWidget('Dummy', Colors.white, Colors.white, () {}),
+                              ],
                             ),
 
                             Padding(
-                              padding: const EdgeInsets.all(12.0),
+                              padding: const EdgeInsets.all(8.0),
                             ),
 
-                            TextFormField(
-                              validator: (val) =>
-                              val.length == 0 ? 'project name is empty' : null,
-                              onSaved: (String val) {
-                                _projectName = val;
-                              },
-                              keyboardType: TextInputType.text,
-                              decoration: new InputDecoration(
-                                labelText: 'Project name',
-                                border: OutlineInputBorder(),
-                                hintStyle: const TextStyle(color: Colors.white, fontSize: 15.0),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0, left: 16.0, right: 16.0),
+                              child: TextFormField(
+                                validator: (val) =>
+                                val.length == 0 ? 'project name is empty' : null,
+                                onSaved: (String val) {
+                                  _projectName = val;
+                                },
+                                keyboardType: TextInputType.text,
+                                decoration: new InputDecoration(
+                                  labelText: 'Project name',
+                                  border: OutlineInputBorder(),
+                                  hintStyle: const TextStyle(color: Colors.white, fontSize: 15.0),
+                                ),
                               ),
                             ),
 
 
                             Padding(
-                              padding: const EdgeInsets.all(12.0),
+                              padding: const EdgeInsets.all(20.0),
                             ),
 
-                            new Text(
-                              "Team members",
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
-                              style: new TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: 0.5,
-                                  color: Colors.black38,
-                                  fontSize: 18.0),
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                TextLabelWidget('Team Members', Colors.white, Colors.deepPurple, () {}),
+                                TextLabelWidget('Dummy', Colors.white, Colors.white, () {}),
+                              ],
                             ),
 
-
-
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
+                            new Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  child: Container(
+                                    child: Padding(
+                                      child: Wrap(
+                                          children: getFilterChips().map((Widget chip) {
+                                            return new Padding(
+                                              padding: const EdgeInsets.all(2.0),
+                                              child: chip,
+                                            );
+                                          }).toList()),
+                                      padding: const EdgeInsets.only(
+                                          top: 4.0, left: 16.0),
+                                    ),
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
 
-
-
-                            Wrap(
-                                children: getFilterChips().map((Widget chip) {
-                                  return new Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: chip,
-                                  );
-                                }).toList()),
-
-
-                            new Padding(padding: new EdgeInsets.all(16.0)),
-
-
+                            new Padding(padding: new EdgeInsets.all(20.0)),
 
                             Padding(
                               padding: EdgeInsets.all(24.0),
@@ -254,7 +269,7 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
                                       elevation: calculateElevation(),
                                       shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
                                       padding: EdgeInsets.all(0.0),
-                                      color: _state == 2 ? Colors.blue : Colors.green,
+                                      color: _state == 2 ? Colors.deepPurple : Colors.black,
                                       child: buildButtonChild(),
                                       onPressed: () {
                                         debugPrint('${_formKey.currentState.validate()}');
@@ -280,8 +295,6 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
                         ),
                       ),
                     ),
-
-
                   ],
                 ),
               ),

@@ -12,7 +12,7 @@ class RevealProgressButtonPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     var paint = Paint()
-      ..color = Colors.green
+      ..color = Colors.deepPurple
       ..style = PaintingStyle.fill;
 
     var finalRadius = sqrt(pow(_screenSize.width / 2, 2) +

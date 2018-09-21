@@ -2,10 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
-import 'package:flutter_mm_hrmangement/ui/signin_page/components/login_form.dart';
 import 'package:flutter_mm_hrmangement/ui/user_management_page/components/user_list_item_widget.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -22,8 +20,15 @@ class _UserManagementPageState extends State<UserManagementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text("Employee Management"),
+      appBar: AppBar(
+        elevation: 0.0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: new Text(
+          "Team Management",
+          style: TextStyle(color: Colors.black),
+        ),
       ),
 
       body: Container(
@@ -32,7 +37,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       ),
 
       floatingActionButton: new FloatingActionButton(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.black,
         onPressed: () {
           Navigation.navigateTo(context, 'add_user', transition: TransitionType.fadeIn);
         },

@@ -5,6 +5,8 @@ import 'package:meta/meta.dart';
 
 class User{
 
+
+
   User({
     @required this.mmid,
     @required this.name,
@@ -24,6 +26,19 @@ class User{
   String currentProject;
   int remainingLeaves;
   int totalLeaves;
+
+  factory User.nullObject(){
+    return User(
+      mmid: null,
+      name: null,
+      avatar: null,
+      authLevel: null,
+      department: null,
+      currentProject: null,
+      remainingLeaves: null,
+      totalLeaves: null
+    );
+  }
 
   factory User.fromJson(DocumentSnapshot snapShot) {
     return User(
@@ -62,6 +77,4 @@ class User{
       avatar.hashCode ^
       remainingLeaves.hashCode ^
       totalLeaves.hashCode;
-
-
 }

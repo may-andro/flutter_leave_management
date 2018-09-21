@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/text_label_widget.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:intl/intl.dart';
@@ -64,65 +65,104 @@ class _AddPublicHolidayPageState extends State<AddPublicHolidayPage>
   Widget build(BuildContext context) {
     return Scaffold(
         key: _globalKey,
-        appBar: new AppBar(
-          title: new Text("Add public holiday"),
+        appBar: AppBar(
+          elevation: 0.0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.black),
+          backgroundColor: Colors.white,
+          title: new Text(
+            "Add Public Holiday",
+            style: TextStyle(color: Colors.black),
+          ),
         ),
         body: Stack(
           fit: StackFit.expand,
           children: <Widget>[
             Container(
-              color: Colors.white70,
+              color: Colors.white,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    createScreenTitleText(),
                     Form(
                         key: formKey,
-                        child: new Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            createTextFormFieldName(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: new Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
 
-                            createTextFormFieldDate(),
-                            Padding(
-                              padding: EdgeInsets.all(24.0),
-                              child: Center(
-                                child: CustomPaint(
-                                  painter: RevealProgressButtonPainter(
-                                      _fraction, MediaQuery.of(context).size),
-                                  child: Container(
-                                    height: 48.0,
-                                    width: _width,
-                                    child: RaisedButton(
-                                      elevation: calculateElevation(),
-                                      shape: new RoundedRectangleBorder(
-                                          borderRadius:
-                                              new BorderRadius.circular(30.0)),
-                                      padding: EdgeInsets.all(0.0),
-                                      color: _state == 2
-                                          ? Colors.green
-                                          : Colors.blue,
-                                      child: buildButtonChild(),
-                                      onPressed: () {
-                                        //do the login
-                                        if (formKey.currentState.validate()) {
-                                          formKey.currentState.save();
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  TextLabelWidget('Holiday Name', Colors.white, Colors.deepPurple, () {}),
+                                  TextLabelWidget('Dummy', Colors.white, Colors.white, () {}),
+                                ],
+                              ),
 
-                                          setState(() {
-                                            _isPressed = !_isPressed;
-                                            if (_state == 0) {
-                                              animateButton();
-                                            }
-                                          });
-                                        }
-                                      },
+                              createTextFormFieldName(),
+
+                              Padding(
+                                padding: const EdgeInsets.all(20.0),
+                              ),
+
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  TextLabelWidget('Holiday Date', Colors.white, Colors.deepPurple, () {}),
+                                  TextLabelWidget('Dummy', Colors.white, Colors.white, () {}),
+                                ],
+                              ),
+
+                              createTextFormFieldDate(),
+
+                              Padding(
+                                padding: const EdgeInsets.all(20.0),
+                              ),
+
+                              Padding(
+                                padding: EdgeInsets.all(24.0),
+                                child: Center(
+                                  child: CustomPaint(
+                                    painter: RevealProgressButtonPainter(
+                                        _fraction, MediaQuery.of(context).size),
+                                    child: Container(
+                                      height: 48.0,
+                                      width: _width,
+                                      child: RaisedButton(
+                                        elevation: calculateElevation(),
+                                        shape: new RoundedRectangleBorder(
+                                            borderRadius:
+                                                new BorderRadius.circular(30.0)),
+                                        padding: EdgeInsets.all(0.0),
+                                        color: _state == 2
+                                            ? Colors.deepPurple
+                                            : Colors.black,
+                                        child: buildButtonChild(),
+                                        onPressed: () {
+                                          //do the login
+                                          if (formKey.currentState.validate()) {
+                                            formKey.currentState.save();
+
+                                            setState(() {
+                                              _isPressed = !_isPressed;
+                                              if (_state == 0) {
+                                                animateButton();
+                                              }
+                                            });
+                                          }
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         )),
                   ],
                 ),
@@ -221,8 +261,7 @@ class _AddPublicHolidayPageState extends State<AddPublicHolidayPage>
       })
       ..addStatusListener((AnimationStatus state) {
         if (state == AnimationStatus.completed) {
-          print("Animation completd");
-          Navigation.navigateTo(context, 'public_holiday_management',
+          Navigation.navigateTo(context, 'public_holiday_management',  replace: true,
               transition: TransitionType.fadeIn);
         }
       });

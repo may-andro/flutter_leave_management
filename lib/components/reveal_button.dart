@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_mm_hrmangement/ui/dashboard_page/home_page.dart';
 import 'package:flutter_mm_hrmangement/components/progress_button.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/home_page.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 
 class CircularRevelButton extends StatefulWidget {
@@ -43,7 +43,7 @@ class _CircularRevelState extends State<CircularRevelButton> with TickerProvider
         if (state == AnimationStatus.completed) {
           print("Animation completd");
           var router = MaterialPageRoute(builder: (BuildContext context){
-            return DashboardPage(title: "Home");
+            return HomePage();
           });
           Navigator.of(context).push(router);
         }

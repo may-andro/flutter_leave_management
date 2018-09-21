@@ -78,13 +78,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
-  firebase_auth:
-    dependency: "direct main"
-    description:
-      name: firebase_auth
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.5.20"
   firebase_core:
     dependency: "direct main"
     description:
@@ -92,13 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.5"
-  firebase_database:
+  firebase_messaging:
     dependency: "direct main"
     description:
-      name: firebase_database
+      name: firebase_messaging
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "2.0.0"
   fluro:
     dependency: "direct main"
     description:
@@ -263,6 +256,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.2"
+  platform:
+    dependency: transitive
+    description:
+      name: platform
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.0"
   plugin:
     dependency: transitive
     description:
@@ -298,6 +298,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
+  shared_preferences:
+    dependency: "direct main"
+    description:
+      name: shared_preferences
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.2"
   shelf:
     dependency: transitive
     description:
