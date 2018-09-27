@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/actions/actions.dart';
 import 'package:flutter_mm_hrmangement/redux/reducers/app_reducer.dart';
@@ -16,91 +16,142 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(new MyApp());
+//void main() => run();
+void main() => run();
 
-class MyApp extends StatelessWidget {
+Future run() async {
+  runApp(new Splash());
 
-  MyApp() {
-    Navigation.initPaths();
-  }
+  var aithUser = await _init();
+  runApp(new App(aithUser));
+}
 
-  Future<AuthUser> isOnboardingANdLoggingFinished() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String savedMmid = prefs.getString(LOGGED_IN_USER_MMID) ?? "";
-    String savedPassword = prefs.getString(LOGGED_IN_USER_PASSWORD) ?? "";
-    bool isOnboarded = prefs.getBool(ONBOARDING_FINISHED) ?? false;
+Future<AuthUser> _init() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String savedMmid = prefs.getString(LOGGED_IN_USER_MMID) ?? "";
+  String savedPassword = prefs.getString(LOGGED_IN_USER_PASSWORD) ?? "";
+  bool isOnboarded = prefs.getBool(ONBOARDING_FINISHED) ?? false;
 
-    if(isOnboarded) {
-      QuerySnapshot querySnapshot = await Firestore.instance
-          .collection('pinCollection')
-          .where('mmid', isEqualTo: '$savedMmid')
-          .getDocuments();
+  if (isOnboarded) {
+    QuerySnapshot querySnapshot = await Firestore.instance
+        .collection('pinCollection')
+        .where('mmid', isEqualTo: '$savedMmid')
+        .getDocuments();
 
-      if( querySnapshot.documents.length > 0) {
-        String fireStorePin = querySnapshot.documents[0]['pin'] as String;
-        if(fireStorePin == savedPassword) {
-          QuerySnapshot userQuerySnapshot = await Firestore.instance
-              .collection('userCollection')
-              .where('mmid', isEqualTo: '$savedMmid')
-              .getDocuments();
+    if (querySnapshot.documents.length > 0) {
+      String fireStorePin = querySnapshot.documents[0]['pin'] as String;
+      if (fireStorePin == savedPassword) {
+        QuerySnapshot userQuerySnapshot = await Firestore.instance
+            .collection('userCollection')
+            .where('mmid', isEqualTo: '$savedMmid')
+            .getDocuments();
 
-          User user = User.fromJson(userQuerySnapshot.documents[0]);
-          return AuthUser(isOnboarded, savedPassword.isNotEmpty && savedMmid.isNotEmpty, user);
-        } else {
-          return AuthUser(isOnboarded, savedPassword.isNotEmpty && savedMmid.isNotEmpty, User.nullObject());
-        }
+        User user = User.fromJson(userQuerySnapshot.documents[0]);
+        return AuthUser(isOnboarded,
+            savedPassword.isNotEmpty && savedMmid.isNotEmpty, user);
       } else {
-        return AuthUser(isOnboarded, savedPassword.isNotEmpty && savedMmid.isNotEmpty, User.nullObject());
+        return AuthUser(
+            isOnboarded,
+            savedPassword.isNotEmpty && savedMmid.isNotEmpty,
+            User.nullObject());
       }
     } else {
-      return AuthUser(isOnboarded, false, User.nullObject());
+      return AuthUser(isOnboarded,
+          savedPassword.isNotEmpty && savedMmid.isNotEmpty, User.nullObject());
     }
+  } else {
+    return AuthUser(isOnboarded, false, User.nullObject());
   }
+}
 
+class Splash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            body: Container(
+              color: Colors.white,
+              child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(child: new FlutterLogo(colors: Colors.pink, size: 80.0)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Center(
+                  child: new Text("Leave Management",
+                      style: new TextStyle(fontSize: 32.0))),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(0.0),
+            child: Center(
+                  child:
+                      new Text("for Mutual Mobile", style: new TextStyle(fontSize: 16.0))),
+          )
+        ], mainAxisAlignment: MainAxisAlignment.center),
+            )),
+        theme: new ThemeData(
+          primarySwatch: Colors.deepPurple,
+          canvasColor: Colors.transparent,
+        ));
+  }
+}
+
+class App extends StatefulWidget {
+  AuthUser authUser;
+
+  @override
+  _AppState createState() => new _AppState();
+
+  App(this.authUser) {
+    Navigation.initPaths();
+  }
+}
+
+class _AppState extends State<App> {
   //REDUX
-  final store = new Store<AppState>(                            // new
-    appReducer,                                                 // new
+  final store = new Store<AppState>(
+    // new
+    appReducer, // new
     initialState: AppState.initial(),
-    distinct: true,// new
-    middleware: [],                                             // new
+    distinct: true, // new
+    middleware: [], // new
   );
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     return StoreProvider(
       store: store,
       child: new MaterialApp(
-        title: 'MM Leave Management',
-        debugShowCheckedModeBanner: false,
-        theme: new ThemeData(
-          primarySwatch: Colors.red,
-          canvasColor: Colors.transparent,
-        ),
-        home: FutureBuilder(
-          future: isOnboardingANdLoggingFinished(),
-          builder: (BuildContext context, AsyncSnapshot<AuthUser> snapshot) {
-            if (snapshot.hasData) {
-              if(!snapshot.data.isOnboarded) {
+          title: 'MM Leave Management',
+          debugShowCheckedModeBanner: false,
+          theme: new ThemeData(
+            primarySwatch: Colors.deepPurple,
+            canvasColor: Colors.transparent,
+          ),
+          home: FutureBuilder(
+            future: Future.delayed(Duration(microseconds: 1)),
+            builder: (BuildContext context, snapshot) {
+              if (!widget.authUser.isOnboarded) {
                 return OnBoardingPage();
-              } else if(snapshot.data.isLoggedIn) {
-                store.dispatch(LoginUserAction(snapshot.data.user));
+              }else if (widget.authUser.isLoggedIn) {
+                store.dispatch(LoginUserAction(widget.authUser.user));
                 return HomePage();
               } else {
                 return SignInPage();
               }
-            }
-            return Container();
-          },
-        )
+            },
+          )
       ),
     );
   }
 }
 
-class AuthUser{
+class AuthUser {
   bool isOnboarded = false;
   bool isLoggedIn = false;
   User user = User.nullObject();
+
   AuthUser(this.isOnboarded, this.isLoggedIn, this.user);
 }

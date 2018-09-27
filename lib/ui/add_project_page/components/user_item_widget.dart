@@ -28,7 +28,7 @@ class _UserItemWidgetState extends State<UserItemWidget> {
               selected: SelectedState,
               leading: const Icon(Icons.info),
               title: new Text("${widget.user.name}"),
-              subtitle: new Text("${widget.user.department}"),
+              subtitle: new Text("${widget.user.role.title}"),
               trailing: new Text("${widget.user.mmid}"),
               onLongPress: select // what should I put here,
           )

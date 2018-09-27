@@ -1,9 +1,20 @@
+import 'dart:async';
+
+import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/loading_widget.dart';
+import 'package:flutter_mm_hrmangement/components/no_data_found_widget.dart';
+import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
+import 'package:flutter_mm_hrmangement/model/RoleModel.dart';
+import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
+import 'dart:convert';
 
 class AddUserPage extends StatefulWidget {
   @override
@@ -26,15 +37,17 @@ class _AddUserPageState extends State<AddUserPage>
   String _name;
   int _numberOfHoliday;
   String _department;
+  Role _userRole;
 
   double _fraction = 0.0;
   var _isPressed = false, _animatingReveal = false;
   int _state = 0;
   double _width = double.infinity;
 
-  List<DropdownMenuItem<String>> _dropDownMenuItemsForAuthLevel;
-  List<DropdownMenuItem<String>> _dropDownMenuItemsForDepartment;
+  List<DropdownMenuItem<Role>> _dropDownMenuItemsForRole;
   List<DropdownMenuItem<int>> _dropDownMenuItemsForNumberOfHoliday;
+
+  final AsyncMemoizer _memoizer = AsyncMemoizer();
 
   @override
   void deactivate() {
@@ -59,12 +72,6 @@ class _AddUserPageState extends State<AddUserPage>
     _controllerShrink = AnimationController(
         duration: const Duration(milliseconds: 1000), vsync: this);
 
-    _dropDownMenuItemsForAuthLevel = getDropDownMenuItemsForAuthLevel();
-    _authLevel = _dropDownMenuItemsForAuthLevel[0].value;
-
-    _dropDownMenuItemsForDepartment = getDropDownMenuItemsForDepartment();
-    _department = _dropDownMenuItemsForDepartment[0].value;
-
     _dropDownMenuItemsForNumberOfHoliday =
         getDropDownMenuItemsForNumberOfHoliday();
     _numberOfHoliday = _dropDownMenuItemsForNumberOfHoliday[0].value;
@@ -76,85 +83,123 @@ class _AddUserPageState extends State<AddUserPage>
     _state = 0;
   }
 
+  Future _fetchData() {
+    return this._memoizer.runOnce(() async {
+      print("How many times");
+      var data = await Firestore.instance.collection("roleCollection").getDocuments();
+
+      _dropDownMenuItemsForRole = getDropDownMenuItemsForRole(data);
+      _userRole = _dropDownMenuItemsForRole[0].value;
+
+      return data;
+
+
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _globalKey,
-        appBar: AppBar(
-          elevation: 0.0,
-          centerTitle: true,
-          iconTheme: IconThemeData(color: Colors.black),
-          backgroundColor: Colors.white,
-          title: new Text(
-            "Add New Member",
-            style: TextStyle(color: Colors.black),
-          ),
+      key: _globalKey,
+      appBar: AppBar(
+        elevation: 0.0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: new Text(
+          "Add New Member",
+          style: TextStyle(color: Colors.black),
         ),
-        body: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            Container(
-              color: Colors.white,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Form(
-                        key: formKey,
-                        child: new Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            createTextFormFieldName(),
-                            createTextFormFieldMmid(),
-                            createTextFormFieldPin(),
-                            createAuthLevelDropDown(),
-                            createDepartmentDropDown(),
-                            createLeaveDropDown(),
-                            Padding(
-                              padding: EdgeInsets.all(24.0),
-                              child: Center(
-                                child: CustomPaint(
-                                  painter: RevealProgressButtonPainter(
-                                      _fraction, MediaQuery.of(context).size),
-                                  child: Container(
-                                    height: 48.0,
-                                    width: _width,
-                                    child: RaisedButton(
-                                      elevation: calculateElevation(),
-                                      shape: new RoundedRectangleBorder(
-                                          borderRadius:
-                                          new BorderRadius.circular(30.0)),
-                                      padding: EdgeInsets.all(0.0),
-                                      color: _state == 2
-                                          ? Colors.deepPurple
-                                          : Colors.black,
-                                      child: buildButtonChild(),
-                                      onPressed: () {
-                                        //do the login
-                                        if (formKey.currentState.validate()) {
-                                          formKey.currentState.save();
+      ),
+      body: buildBody(),
+    );
+  }
 
-                                          setState(() {
-                                            _isPressed = !_isPressed;
-                                            if (_state == 0) {
-                                              animateButton();
-                                            }
-                                          });
-                                        }
-                                      },
-                                    ),
+  Widget buildBody() {
+    return FutureBuilder(
+        future: _fetchData(),
+        builder: (context, AsyncSnapshot snapShot) {
+          if (!snapShot.hasData) {
+            return LoadingWidget("Fetching data from server");
+          } else {
+            if (snapShot.data.documents.length == 0) {
+              return NoDataFoundWidget("You have not applied for leaves yet");
+            } else {
+              print(snapShot.data.documents.length);
+              return Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  Container(
+                    color: Colors.white,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Form(
+                              key: formKey,
+                              child: new Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  createTextFormFieldName(),
+                                  createTextFormFieldMmid(),
+                                  createTextFormFieldPin(),
+                                  createRoleDropDown(),
+                                  createLeaveDropDown(),
+                                ],
+                              )
+                          ),
+
+                          Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Center(
+                              child: CustomPaint(
+                                painter: RevealProgressButtonPainter(
+                                    _fraction,
+                                    MediaQuery.of(context).size),
+                                child: Container(
+                                  height: 48.0,
+                                  width: _width,
+                                  child: RaisedButton(
+                                    elevation: calculateElevation(),
+                                    shape: new RoundedRectangleBorder(
+                                        borderRadius:
+                                        new BorderRadius.circular(
+                                            30.0)),
+                                    padding: EdgeInsets.all(0.0),
+                                    color: _state == 2
+                                        ? Colors.deepPurple
+                                        : Colors.black,
+                                    child: buildButtonChild(),
+                                    onPressed: () {
+                                      //do the login
+                                      if (formKey.currentState
+                                          .validate()) {
+                                        formKey.currentState.save();
+
+                                        setState(() {
+                                          _isPressed = !_isPressed;
+                                          if (_state == 0) {
+                                            animateButton();
+                                          }
+                                        });
+                                      }
+                                    },
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        )),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ));
+                          ),
+
+
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              );
+            }
+          }
+        });
   }
 
   Widget createScreenTitleText() {
@@ -228,87 +273,11 @@ class _AddUserPageState extends State<AddUserPage>
     );
   }
 
-  List<DropdownMenuItem<String>> getDropDownMenuItemsForAuthLevel() {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String authLevel in AUTHORITY_LEVEL_LIST) {
-      items.add(
-          new DropdownMenuItem(value: authLevel, child: Container(color: Colors.white,child: Text(authLevel))));
-    }
-    return items;
-  }
-
-  Widget createAuthLevelDropDown() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Authority Level',
-          border: OutlineInputBorder(),
-        ),
-        isEmpty: _authLevel == '',
-        child: DropdownButtonHideUnderline(
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              canvasColor: Colors.white,
-            ),
-            child: DropdownButton<String>(
-              value: _authLevel,
-              isDense: true,
-              onChanged: (String newValue) {
-                setState(() {
-                  _authLevel = newValue;
-                });
-              },
-              items: getDropDownMenuItemsForAuthLevel(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<DropdownMenuItem<String>> getDropDownMenuItemsForDepartment() {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String item in DEPARTMENT_LIST) {
-      items.add(new DropdownMenuItem(value: item, child: Container(color: Colors.white,child: Text(item))));
-    }
-    return items;
-  }
-
-  createDepartmentDropDown() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Department',
-          border: OutlineInputBorder(),
-        ),
-        isEmpty: _department == '',
-        child: DropdownButtonHideUnderline(
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              canvasColor: Colors.white,
-            ),
-            child: DropdownButton<String>(
-              value: _department,
-              isDense: true,
-              onChanged: (String newValue) {
-                setState(() {
-                  _department = newValue;
-                });
-              },
-              items: getDropDownMenuItemsForDepartment(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   List<DropdownMenuItem<int>> getDropDownMenuItemsForNumberOfHoliday() {
     List<DropdownMenuItem<int>> items = new List();
     for (int i = 0; i < 27; i++) {
-      items.add(DropdownMenuItem(value: i, child: Container(color: Colors.white,child: Text('$i'))));
+      items.add(DropdownMenuItem(
+          value: i, child: Container(color: Colors.white, child: Text('$i'))));
     }
     return items;
   }
@@ -343,6 +312,49 @@ class _AddUserPageState extends State<AddUserPage>
     );
   }
 
+  Widget createRoleDropDown() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'Authentication Level',
+          border: OutlineInputBorder(),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              canvasColor: Colors.white,
+            ),
+            child: DropdownButton<Role>(
+              value: _userRole,
+              isDense: true,
+              onChanged: (Role newValue) {
+                print(newValue);
+                setState(() {
+                  _userRole = newValue;
+                });
+              },
+              items: _dropDownMenuItemsForRole,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DropdownMenuItem<Role>> getDropDownMenuItemsForRole(QuerySnapshot snapShot) {
+    List<DropdownMenuItem<Role>> _dropdownMenuItem = [];
+
+    snapShot.documents.forEach((snapshot) {
+      Role role = Role.fromJson(snapshot);
+      _dropdownMenuItem.add(DropdownMenuItem(
+          value: role,
+          child: Container(color: Colors.white, child: Text('${role.title}'))));
+    });
+
+    return _dropdownMenuItem;
+  }
+
   void animateButton() {
     double initialWidth = _globalKey.currentContext.size.width;
 
@@ -359,30 +371,53 @@ class _AddUserPageState extends State<AddUserPage>
       _state = 1;
     });
 
-    debugPrint("$_mmid $_name $_password");
-    Firestore.instance
-        .collection('userCollection')
-        .document('$_mmid')
-        .setData({
-      "mmid": "$_mmid",
-      "name": "$_name",
-      "avatar": "",
-      "authLevel": "$_authLevel",
-      "department": "$_department",
-      "currentProject": "",
-      "remainingLeaves": _numberOfHoliday,
-      "totalLeaves": _numberOfHoliday,
-    }).then((string) {
-      Firestore.instance
-          .collection('pinCollection')
-          .document('$_mmid')
-          .setData({
+    Firestore.instance.runTransaction((Transaction transaction) async {
+      var role = {
+        "id" : _userRole.id,
+        "title" : "${_userRole.title}",
+        "shortcut" : "${_userRole.shortcut}",
+      };
+
+      CollectionReference reference = Firestore.instance.collection('userCollection');
+      await reference.document(_mmid).setData({
+        "mmid": "$_mmid",
+        "name": "$_name",
+        "avatar": "",
+        "role": role,
+        "remainingLeaves": _numberOfHoliday,
+        "totalLeaves": _numberOfHoliday,
+      });
+    });
+
+    Firestore.instance.runTransaction((Transaction transaction) async {
+      CollectionReference reference = Firestore.instance.collection('pinCollection');
+      await reference.document(_mmid).setData({
         "mmid": "$_mmid",
         "pin": "$_password",
-      }).then((string) {
-        setState(() {
-          _state = 2;
-        });
+      });
+    });
+
+
+    Firestore.instance.runTransaction((transaction) async {
+      var snapshot = await Firestore.instance.collection('projectCollection').document('hyd_pto_planning').get();
+      Project project = Project.fromJson(snapshot.data);
+      print(json.encode(project.team));
+      project.team.add(ProjectUser(
+          name: '$_name',
+          mmid: '$_mmid',
+          isManager: (_userRole.id == 0 || _userRole.id == 1 || _userRole.id == 4 || _userRole.id == 5 || _userRole.id == 6) ? true: false));
+      print(json.encode(project));
+      var updatedTeam = project.team.map((projectUser) {
+        Map<String,dynamic> projectUserMap = new Map<String,dynamic>();
+        projectUserMap["mmid"] = projectUser.mmid;
+        projectUserMap["name"] = projectUser.name;
+        projectUserMap["isManager"] = projectUser.isManager;
+        print(projectUserMap);
+        return projectUserMap;
+      }).toList();
+      await transaction.update(snapshot.reference, {"team": updatedTeam});
+      setState(() {
+        _state = 2;
       });
       _animatingReveal = true;
       reveal();
@@ -399,8 +434,8 @@ class _AddUserPageState extends State<AddUserPage>
       ..addStatusListener((AnimationStatus state) {
         if (state == AnimationStatus.completed) {
           print("Animation completd");
-          Navigation.navigateTo(context, 'user_management',  replace: true,
-              transition: TransitionType.fadeIn);
+          Navigation.navigateTo(context, 'user_management',
+              replace: true, transition: TransitionType.fadeIn);
         }
       });
     _controllerReveal.forward();

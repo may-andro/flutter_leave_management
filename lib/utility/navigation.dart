@@ -7,6 +7,7 @@ import 'package:flutter_mm_hrmangement/ui/approve_leave_request/approve_leave_pa
 import 'package:flutter_mm_hrmangement/ui/home_page/home_page.dart';
 import 'package:flutter_mm_hrmangement/ui/leave_request_page/user_leave_request_page.dart';
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/onboarding_page.dart';
+import 'package:flutter_mm_hrmangement/ui/profile_page/components/project_detail_page.dart';
 import 'package:flutter_mm_hrmangement/ui/project_management_page/project_management_page.dart';
 import 'package:flutter_mm_hrmangement/ui/public_holiday_page/public_hoilday_page.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/signin_page.dart';
@@ -53,9 +54,9 @@ class Navigation {
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
             return AddPublicHolidayPage();
           }))
-      ..define('approve_leave', handler: Handler(
+      ..define('profile_page', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-            return ApproveLeavePage();
+            return LeaveDetailsPage();
           }))
       ..define('leave_request', handler: Handler(
           handlerFunc: (BuildContext context, Map<String, dynamic> params) {

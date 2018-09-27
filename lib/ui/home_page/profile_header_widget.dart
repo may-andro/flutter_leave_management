@@ -51,7 +51,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                   child: Opacity(
                     opacity: fraction,
                     child: Text(
-                      "${viewModel.user.department}",
+                      "${viewModel.user.role.title}",
                       style: Theme.of(context).textTheme.caption,
                     ),
                   ),

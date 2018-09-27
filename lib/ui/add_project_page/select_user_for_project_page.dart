@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/model/RoleModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/ui/add_project_page/add_new_project_page.dart';
 import 'package:flutter_mm_hrmangement/ui/add_project_page/model/AddProjectBloc.dart';
@@ -53,33 +54,33 @@ class _SelectUserForProjectPageState extends State<SelectUserForProjectPage> {
                       if (snapShot.hasError) {
                         return ErrorInDataWidget();
                       } else {
-                        var map = Map<String, List<User>>();
-
+                        var map = Map<Role, List<User>>();
                         snapShot.data.documents.forEach((document) {
                           User user = User.fromJson(document);
-                          if (map.containsKey(user.department)) {
-                            var list = map[user.department];
+                          if (map.containsKey(user.role)) {
+                            var list = map[user.role];
                             list.add(user);
                           } else {
-                            map.putIfAbsent(user.department, () => [user]);
+                            map.putIfAbsent(user.role, () => [user]);
                           }
                         });
 
                         var headerList = [];
-                        map.forEach((designation, list) {
-                          headerList.add(designation);
+                        map.forEach((role, list) {
+                          headerList.add(role);
                           headerList.addAll(list);
                         });
+
 
                         return ListView.builder(
                             itemCount: headerList.length,
                             padding: const EdgeInsets.all(0.0),
                             itemBuilder: (context, index) {
                               var item = headerList[index];
-                              if (item is String) {
+                              if (item is Role) {
                                 return Padding(
                                   padding: EdgeInsets.all(10.0),
-                                  child: Text(item),
+                                  child: Text(item.title),
                                 );
                               } else {
                                 return UserListItem(
@@ -88,12 +89,12 @@ class _SelectUserForProjectPageState extends State<SelectUserForProjectPage> {
                                   onTapUserItem: () {
                                     setState(() {
                                       if (selectedUserList.contains(item)) {
-                                        if((item as User).department == DEPARTMENT_LIST[3]) isManagerSelected = false;
-                                        if((item as User).department == DEPARTMENT_LIST[4]) isLeadSelected = false;
+                                        if( (item as User).role.id == 5) isManagerSelected = false;
+                                        if((item as User).role.id == 6) isLeadSelected = false;
                                         selectedUserList.remove(item);
                                       } else {
-                                        if((item as User).department == DEPARTMENT_LIST[3]) isManagerSelected = true;
-                                        if((item as User).department == DEPARTMENT_LIST[4]) isLeadSelected = true;
+                                        if((item as User).role.id == 5) isManagerSelected = true;
+                                        if((item as User).role.id == 6) isLeadSelected = true;
                                         selectedUserList.add(item);
                                       }
                                     });
@@ -123,11 +124,7 @@ class _SelectUserForProjectPageState extends State<SelectUserForProjectPage> {
         onPressed: () {
           if(selectedUserList.isEmpty) {
             showInSnackBar("No user selected");
-          } else if(!isLeadSelected) {
-            showInSnackBar("Team lead is required");
-          } else if(!isManagerSelected){
-            showInSnackBar("Manager is required");
-          } else {
+          } else if(isLeadSelected || isManagerSelected) {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -135,6 +132,8 @@ class _SelectUserForProjectPageState extends State<SelectUserForProjectPage> {
                     AddNewProjectPage(teamList: selectedUserList),
               ),
             );
+          } else {
+            showInSnackBar("Team lead/Project Manager is required");
           }
         });
   }
@@ -174,7 +173,7 @@ class _UserListItemState extends State<UserListItem> {
           subtitle: new Padding(
             padding: new EdgeInsets.only(top: 5.0),
             child: new Text(
-              '${widget.user.department.substring(0, 1)}',
+              '${widget.user.role.shortcut}',
               style: new TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300),
             ),
           ),
@@ -197,7 +196,7 @@ class _UserListItemState extends State<UserListItem> {
     if (widget.isSelected) {
       return IconButton(
         icon: const Icon(Icons.done),
-        tooltip: 'Add Project',
+        tooltip: 'Add Project ',
         onPressed: () {
           setState(() {});
         },

@@ -43,9 +43,9 @@ class _PublicHolidayPageState extends State<PublicHolidayPage> {
           converter: (Store<AppState> store) => _ViewModel.fromStore(store),
           builder: (BuildContext context, _ViewModel viewModel) {
             return IgnorePointer(
-              ignoring: (viewModel.user.authLevel != AUTHORITY_LEVEL_LIST[1]),
+              ignoring: (viewModel.user.role.id != 1),
               child: Opacity(
-                opacity: (viewModel.user.authLevel == AUTHORITY_LEVEL_LIST[1]) ? 1.0 : 0.0,
+                opacity: (viewModel.user.role.id == 1) ? 1.0 : 0.0,
                 child: FloatingActionButton(
                   backgroundColor: Colors.black,
                   onPressed: () {

@@ -278,6 +278,7 @@ class _LoginFormState extends State<LoginFormWidget>
         .where('mmid', isEqualTo: '$_mmid')
         .getDocuments();
 
+    print(querySnapshot.documents.length);
     if( querySnapshot.documents.length > 0) {
       String fireStorePin = querySnapshot.documents[0]['pin'] as String;
 

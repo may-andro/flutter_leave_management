@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mm_hrmangement/components/text_label_widget.dart';
+import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
@@ -123,34 +124,26 @@ class _AddNewProjectPageState extends State<AddNewProjectPage> with TickerProvid
       _state = 1;
     });
 
-    List usserMmidList = [];
-    List managerList = [];
-    List leadList = [];
-    widget.teamList.forEach( (user) {
-      usserMmidList.add(user.mmid);
-      if(user.department == "Manager") {
-        managerList.add(user.name);
-      }
-      if(user.department == "Software Developer Lead") {
-        leadList.add(user.name);
-      }
-    });
+    Firestore.instance.runTransaction((Transaction transaction) async {
+      CollectionReference reference = Firestore.instance.collection('projectCollection');
+      var team = widget.teamList.map((user) {
+        Map<String,dynamic> projectUserMap = new Map<String,dynamic>();
+        projectUserMap["mmid"] = user.mmid;
+        projectUserMap["name"] = user.name;
+        projectUserMap["isManager"] = (user.role.id == 0 || user.role.id == 1 || user.role.id == 4 || user.role.id == 5 || user.role.id == 6) ? true: false;
+        print(projectUserMap);
+        return projectUserMap;
+      }).toList();
 
-    debugPrint('${usserMmidList}');
-    Firestore.instance.collection('projectCollection')
-        .document('$_projectName')
-        .setData({
-      "name": "$_projectName",
-      'team': usserMmidList,
-      'lead': leadList,
-      'manager': managerList})
-        .then((string) {
+      await reference.document(_projectName).setData({
+        "name": "$_projectName",
+        "team": team,
+      });
+
       setState(() {
         _state = 2;
       });
-    });
 
-    Timer(Duration(milliseconds: 700), () {
       _animatingReveal = true;
       reveal();
     });

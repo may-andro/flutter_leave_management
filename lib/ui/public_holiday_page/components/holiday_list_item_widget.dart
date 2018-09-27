@@ -51,9 +51,9 @@ class HolidayListItemWidget extends StatelessWidget {
               converter: (Store<AppState> store) => _ViewModel.fromStore(store),
               builder: (BuildContext context, _ViewModel viewModel) {
                 return IgnorePointer(
-                  ignoring: (viewModel.user.authLevel == AUTHORITY_LEVEL_LIST[1]) ? true : false,
+                  ignoring: (viewModel.user.role.id == 1) ? true : false,
                   child: Opacity(
-                    opacity: (viewModel.user.authLevel == AUTHORITY_LEVEL_LIST[1]) ? 1.0 : 0.0,
+                    opacity: (viewModel.user.role.id == 1) ? 1.0 : 0.0,
                     child: IconButton(
                       icon: new Icon(
                         Icons.delete,

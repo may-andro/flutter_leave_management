@@ -24,19 +24,19 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 
   static const _kDuration = const Duration(milliseconds: 300);
 
-  final _kArrowColor = Colors.black.withOpacity(0.8);
-
   bool isLastPage = false;
 
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: createContent());
+    return Scaffold(
+        body: createContent()
+    );
   }
 
   Widget createContent() {
     return Container(
-        color: Colors.grey,
+        color: Colors.white,
         child: Stack(children: <Widget>[
           PageTransformer(
             pageViewBuilder: (context, visibilityResolver) {

@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +16,10 @@ import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
+
 
 class LeaveRequestPage extends StatefulWidget {
   @override
@@ -73,6 +81,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     _state = 0;
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,24 +99,59 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     );
   }
 
+  final AsyncMemoizer _memoizer = AsyncMemoizer();
+  List<ProjectUser> teamList = [];
+  List<String> fcmTokenList = [];
+
+  Future _fetchData(User user) {
+    return this._memoizer.runOnce(() async {
+      Map<String,dynamic> projectUserMap = {};
+      projectUserMap["mmid"] = '${user.mmid}';
+      projectUserMap["name"] = '${user.name}';
+      projectUserMap["isManager"] = (user.role.id == 0 || user.role.id == 1 || user.role.id == 4 || user.role.id == 5 || user.role.id == 6) ? true: false;
+      print('projectUserMap data: $projectUserMap');
+      var data = await Firestore.instance
+          .collection("projectCollection")
+          .where('team', arrayContains: projectUserMap)
+          .getDocuments();
+      print('projectUserMap data: ${data.documents.length}');
+      data.documents.map<Widget>((DocumentSnapshot documentSnapshot) {
+        Project project = Project.fromJson(documentSnapshot.data);
+        project.team.forEach((projectUser) {
+          if(!teamList.contains(projectUser) && projectUser.isManager && projectUser.mmid != user.mmid) {
+            teamList.add(projectUser);
+            print('projectUser data: ${projectUser}');
+          }
+        });
+      }).toList();
+
+      teamList.forEach((projectUser) {
+        Firestore.instance.collection("fcmCollection").document(projectUser.mmid).get().then((snapshot) {
+          fcmTokenList.add(snapshot['token']);
+        });
+      });
+
+      print('teamList data: ${teamList.length}');
+      print('fcmTokenList data: ${fcmTokenList.length}');
+      return teamList;
+    });
+  }
+
   Widget createUi(BuildContext context) {
     return StoreConnector<AppState, _ViewModel>(
         converter: (Store<AppState> store) => _ViewModel.fromStore(store),
         builder: (BuildContext context, _ViewModel viewModel) {
-          return StreamBuilder(
-            stream: Firestore.instance
-                .collection("projectCollection")
-                .where('team', arrayContains: '${viewModel.user.mmid}')
-                .snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapShot) {
+          return FutureBuilder(
+            future: _fetchData(viewModel.user),
+            builder: (context, AsyncSnapshot snapShot) {
               if (!snapShot.hasData) {
-                return Stack(
-                  fit: StackFit.expand,
-                    children: <Widget>[
-                      LoadingWidget("Fetching data"),
-                    ],);
+                return Center(
+                  child: Container(
+                      color: Colors.white,
+                      child: LoadingWidget("Fetching data")
+                  ),
+                );
               } else {
-
                 return Stack(
                   fit: StackFit.expand,
                   children: <Widget>[
@@ -177,8 +221,8 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                       child: Container(
                                         child: Padding(
                                           child: Wrap(
-                                              children: getFilterChips(
-                                                      snapShot.data.documents)
+                                              children: getFilterChips( snapShot.data,
+                                                viewModel.user)
                                                   .map((Widget chip) {
                                             return new Padding(
                                               padding:
@@ -223,7 +267,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                               _isPressed = !_isPressed;
                                               if (_state == 0) {
                                                 animateButton(
-                                                    viewModel.user.mmid);
+                                                    viewModel.user);
                                               }
                                             });
                                           },
@@ -232,7 +276,8 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                     ),
                                   ),
                                 ),
-                              ]),
+                              ]
+                              ),
                             ),
                           ],
                         ),
@@ -285,7 +330,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     );
   }
 
-  void animateButton(String mmid) {
+  void animateButton(User user) async{
     double initialWidth = _globalKey.currentContext.size.width;
 
     _animationShrink = Tween(begin: 0.0, end: 1.0).animate(_controllerShrink)
@@ -300,24 +345,49 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     setState(() {
       _state = 1;
     });
+    
+    print("dates are $_fromDate  $_toDate ${fcmTokenList.length}");
+    fcmTokenList.forEach((token) {
+      sendNotification(token, user);
+    });
 
-    print("dates are $_fromDate  $_toDate");
-    Firestore.instance.collection('leaveCollection').document().setData({
-      "mmid": "$mmid",
-      "typeOfLeave": "$_typeOfLeave",
-      "startDate": _fromDate,
-      "endDate": _toDate,
-      "isSingleDayLeave": isSingleDaySelected,
-      "numberOfDays": _fromDate.compareTo(_toDate),
-      "message": "To be  add",
-      "status": 0,
-    }).then((string) {
+    Firestore.instance.runTransaction((Transaction transaction) async {
+      CollectionReference reference = Firestore.instance.collection('leaveCollection');
+      await reference.document().setData({
+        "mmid": "${user.mmid}",
+        "typeOfLeave": "$_typeOfLeave",
+        "startDate": _fromDate,
+        "endDate": _toDate,
+        "isSingleDayLeave": isSingleDaySelected,
+        "numberOfDays": _fromDate.compareTo(_toDate),
+        "message": "To be  add",
+        "status": 0,
+      });
+
       setState(() {
         _state = 2;
       });
 
       _animatingReveal = true;
       reveal();
+    });
+  }
+
+  void sendNotification(String sendingToken, User user) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var fcm_token = prefs.getString(FIREBASE_FCM_TOKEN);
+    var base = 'https://us-central1-mm-leavemanagement.cloudfunctions.net/';
+    String dataURL = '$base/sendNotification?'
+        'to=${sendingToken}'
+        '&fromPushId=$fcm_token'
+        '&fromId=${user.mmid}'
+        '&fromName=${user.name}'
+        '&fromMessage=${getLeaveMessage(_toDate.compareTo(_fromDate), _toDate, _fromDate, "", _typeOfLeave, user.name)}'
+        '&isApproved=false'
+        '&type=leave_request';
+    print(dataURL);
+    await http.get(dataURL).then((response) {
+
     });
   }
 
@@ -367,12 +437,12 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     }
   }
 
-  List<Widget> getStringFilterChips(List<String> managerList) {
-    List<Widget> filterChips = managerList.map<Widget>((String mmid) {
+  List<Widget> getStringFilterChips(List<ProjectUser> managerList) {
+    List<Widget> filterChips = managerList.map<Widget>((ProjectUser projectUser) {
       return new InputChip(
         avatar: Container(
             child: new CircleAvatar(
-              child: const Text('C'),
+              child: const Text('CA'),
               foregroundColor: Colors.white,
             ),
             padding: const EdgeInsets.all(2.0), // borde width
@@ -380,29 +450,25 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
               color: const Color(0xFFFFFFFF), // border color
               shape: BoxShape.circle,
             )),
-        key: new ValueKey<String>(mmid),
+        key: new ValueKey<ProjectUser>(projectUser),
         label: new Text(
-          (mmid),
+          (projectUser.name),
           style: Theme.of(context).textTheme.subhead,
         ),
       );
     }).toList();
-
     return filterChips;
   }
 
-  List<Widget> getFilterChips(List<DocumentSnapshot> documents) {
+
+  List<Widget> getFilterChips(List<ProjectUser> documents, User user) {
+    print('senders are ${documents.length}');
+    print('tokens are ${fcmTokenList.length}');
     List<Widget> filterChips = [];
-
-    documents.map<Widget>((DocumentSnapshot documentSnapshot) {
-      Project project = Project.fromJson(documentSnapshot);
-      filterChips.addAll(getStringFilterChips(project.manager));
-      filterChips.addAll(getStringFilterChips(project.lead));
-    }).toList();
-
-    filterChips.addAll(getStringFilterChips(["hyd-pto_planing"]));
+    filterChips.addAll(getStringFilterChips(documents));
     return filterChips;
   }
+
 
   Widget createDatePickerDependingOnLeaveDays() {
     if (isSingleDaySelected) {
@@ -442,8 +508,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
 }
 
 
-
-
 class _ViewModel {
   final User user;
 
@@ -455,3 +519,47 @@ class _ViewModel {
     return new _ViewModel(user: store.state.user);
   }
 }
+
+
+String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate, String reason, String typeOfLeave, String name) {
+  String vocationalMessage =  'Hi Team!'
+      '\n\n'
+      'I would like to reuest for ${dayCount} day leave to spend time with my family and friends from ${_fromDate} to ${_toDate}.'
+      'I will available on phone and email in case of any need/assiatance.'
+      '\n'
+      'I request you to grant me the requested leaves'
+      '\n\n'
+      'Your truly'
+      '\n'
+      '$name';
+
+  String sickLeaveMessage =  'Hi Team!'
+      '\n\n'
+      'I would like to reuest for ${dayCount} day leave since $reason.'
+      '\n'
+      'I request you to grant me the requested sick leaves'
+      '\n\n'
+      'Your truly'
+      '\n'
+      '$name';
+  String workFromHomeMessage =  'Hi Team!'
+      '\n\n'
+      'I would like to reuest for work from home on $_toDate as $reason.'
+      'I will available on phone, Slack, Hangout and email to collaborate with the team mates and fullfill my duities for the day.'
+      '\n'
+      'I request you to grant me the work from home for $_toDate'
+      '\n\n'
+      'Your truly'
+      '\n'
+      '$name';
+  switch(typeOfLeave) {
+    case "Vacation and Family":
+      return vocationalMessage;
+    case "Sick Leave/ Emergency Leave":
+      return sickLeaveMessage;
+    case "Work from home":
+      return workFromHomeMessage;
+  }
+}
+
+

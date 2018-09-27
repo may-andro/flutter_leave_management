@@ -55,7 +55,7 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
 
   Widget _createContent(BuildContext context) {
     return StreamBuilder(
-      stream: Firestore.instance.collection("projectCollection").snapshots(),
+      stream: Firestore.instance.collection("projectCollection").getDocuments().asStream(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapShot) {
         if (!snapShot.hasData) {
           return LoadingWidget("Fetching data");
@@ -63,13 +63,20 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
           if (snapShot.hasError) {
             return NoDataFoundWidget("No data found");
           } else {
+            if(snapShot.data.documents.length <= 1) {
+              return NoDataFoundWidget("No project found");
+            }
+
             return ListView.builder(
                 itemCount: snapShot.data.documents.length,
                 padding: const EdgeInsets.all(0.0),
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapShot.data.documents[index];
-                  Project project = Project.fromJson(ds);
+                  Project project = Project.fromJson(ds.data);
                   debugPrint('${project.team}');
+                  if(project.name == 'hyd_pto_planning') {
+                    return Center();
+                  }
                   return  UserListItem(
                     project: project,
                     onTapUserItem: () {
@@ -87,7 +94,6 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
 }
 
 class UserListItem extends StatefulWidget {
-
   UserListItem({
     this.project,
     this.onTapUserItem,
@@ -117,7 +123,7 @@ class _UserListItemState extends State<UserListItem> {
           ),
           subtitle: new Padding(
             padding: new EdgeInsets.only(top: 5.0),
-            child: new Text('${widget.project.team.length}',
+            child: new Text('${widget.project.team.length} Members',
               style: new TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300),
             ),
           ),

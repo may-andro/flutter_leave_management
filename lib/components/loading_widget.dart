@@ -8,24 +8,29 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: <Widget>[
-          ProgressHUD(
-            inAsyncCall: true,
-            child: Text(
-              "$message",
-              style: TextStyle(
-                color: Colors.blueGrey,
-                letterSpacing: 1.2,
-                fontFamily: 'Poppins',
-                fontStyle: FontStyle.normal,
-                fontWeight: FontWeight.w600,
-                fontSize: 20.0,
+    return Container(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          children: <Widget>[
+            ProgressHUD(
+              inAsyncCall: true,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+              color: Colors.black,
+              child: Text(
+                "$message",
+                style: TextStyle(
+                  color: Colors.black,
+                  letterSpacing: 1.2,
+                  fontFamily: 'Poppins',
+                  fontStyle: FontStyle.normal,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20.0,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
