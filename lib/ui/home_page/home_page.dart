@@ -1,22 +1,33 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
+import 'package:flutter_mm_hrmangement/model/RoleModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
+import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_action.dart';
+import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_action.dart';
+import 'package:flutter_mm_hrmangement/redux/login_action/actions.dart';
+import 'package:flutter_mm_hrmangement/redux/project_management_redux/project_management_action.dart';
+import 'package:flutter_mm_hrmangement/redux/public_holiday/public_holiday_action.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/ui/approve_leave_request/approve_leave_page.dart';
-import 'package:flutter_mm_hrmangement/ui/home_page/ViewModel.dart';
-import 'package:flutter_mm_hrmangement/ui/home_page/applies_leave_list.dart';
-import 'package:flutter_mm_hrmangement/ui/home_page/profile_header_widget.dart';
+import 'package:flutter_mm_hrmangement/ui/dashboard_page/dashboard_page.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/components/extended_fab_widget.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/components/menu_screen.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/components/zoom_scaffold.dart';
+import 'package:flutter_mm_hrmangement/ui/leave_request_page/user_leave_request_page.dart';
+import 'package:flutter_mm_hrmangement/ui/project_management/project_management_page.dart';
+import 'package:flutter_mm_hrmangement/ui/public_holiday_management/add_public_holiday_page/add_public_holiday_page.dart';
+import 'package:flutter_mm_hrmangement/ui/public_holiday_management/public_holiday_page/public_hoilday_page.dart';
+import 'package:flutter_mm_hrmangement/ui/user_management_page/user_list_page.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,57 +36,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  AnimationController _screenController;
-
-  Animation<double> _animationReveal;
-
-  double _fraction = 0.0;
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-
-  ScrollController _hideButtonController;
-
-  bool _isVisible = true;
+  MenuController menuController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
 
-    _hideButtonController = new ScrollController();
-    /* _hideButtonController.addListener((){
-      if(_hideButtonController.position.userScrollDirection == ScrollDirection.reverse){
-        setState((){
-          _isVisible = false;
-          print("**** ${_isVisible} up");
-        });
-      }
-      if(_hideButtonController.position.userScrollDirection == ScrollDirection.forward){
-        setState((){
-          _isVisible = true;
-          print("**** ${_isVisible} down");
-        });
-      }
-    });
-    */
-    _screenController = new AnimationController(
-        duration: new Duration(seconds: 3), vsync: this);
-
-    _animationReveal = Tween(begin: 0.0, end: 1.0).animate(_screenController)
-      ..addListener(() {
-        setState(() {
-          _fraction = _animationReveal.value;
-        });
-      });
-
-    _screenController.forward();
+    menuController = new MenuController(
+      vsync: this,
+    )..addListener(() => setState(() {}));
 
     _firebaseMessaging.configure(
       onLaunch: (Map<String, dynamic> msg) async{
         print("onLaunch called");
         handleMessage(msg);
-
       },
       onResume:  (Map<String, dynamic> msg) async{
         print("onResume called");
@@ -123,8 +99,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     //handle the message
     //send user to approve screen
     print(json.encode(message));
-    print(message['data']['fromName']);
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -132,259 +106,201 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ApproveLeavePage(message['data']),
       ),
     );
-
-    //Navigation.navigateTo(context, 'approve_leave', transition: TransitionType.fadeIn);
   }
 
   @override
   void dispose() {
-    _screenController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    timeDilation = 0.3;
-    return Scaffold(
-      key: _scaffoldKey,
-      body: SafeArea(
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[Container(color: Colors.white, child: _buildUI())],
-        ),
+
+  Menu getMenu(Role role) {
+    var list = [
+      MenuItem(
+        id: 0,
+        title: 'Dashboard',
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.deepPurple,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.menu,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                _modalBottomSheetMenu();
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.settings,
-                color: Colors.white,
-              ),
-              onPressed: () {
-              },
-            ),
-          ],
-        ),
+      MenuItem(
+        id: 1,
+        title: 'Company Leave',
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Opacity(
-        opacity: _isVisible ? 1.0 : 0.0,
-        child: FloatingActionButton.extended(
-          elevation: 4.0,
-          clipBehavior: Clip.antiAlias,
-          icon: const Icon(Icons.add),
-          label: const Text('Request for leave'),
-          backgroundColor: Colors.black,
-          onPressed: () {
-            Navigation.navigateTo(context, 'leave_request',
-                transition: TransitionType.fadeIn);
-          },
-        ),
-      ),
+    ];
+
+    if(role.id == 1 || role.id == 0) {
+      list.add(MenuItem(
+        id: 2,
+        title: 'Team',
+      ));
+    }
+
+    if(role.id == 5 || role.id == 6 || role.id == 0) {
+      list.add(MenuItem(
+        id: 3,
+        title: 'Project',
+      ));
+    }
+
+    list.add(MenuItem(
+      id: 4,
+      title: 'Logout',
+    ));
+
+    return Menu(
+      items: list,
     );
   }
 
-  Widget _buildUI() {
-    final Orientation orientation = MediaQuery.of(context).orientation;
-    bool isLandscape = orientation == Orientation.landscape;
+  var selectedMenuItemId = 0;
 
-    if (isLandscape) {
-      return _landscapeWidget();
-    } else {
-      return _portraitWidget();
+  @override
+  Widget build(BuildContext context) {
+
+    return StoreConnector<AppState, HomeViewModel>(
+        converter: (Store<AppState> store) => HomeViewModel.fromStore(store),
+        builder: (BuildContext context, HomeViewModel viewModel) {
+          return ZoomScaffold(
+            menuController: menuController,
+            menuScreen: MenuScreen(
+              menu: getMenu(viewModel.user.role),
+              selectedItemId: selectedMenuItemId,
+              onMenuItemSelected: (int itemId) {
+                setState(() {
+                  selectedMenuItemId = itemId;
+                });
+              },
+            ),
+            contentScreen: Scaffold(
+              key: _scaffoldKey,
+              body: SafeArea(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Container(
+                        color: Colors.white,
+                        child: _buildUI(selectedMenuItemId, context)
+                    )
+                  ],
+                ),
+              ),
+              bottomNavigationBar: BottomAppBar(
+                color: Colors.deepPurple,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        menuController.toggle();
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.settings,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+              floatingActionButton: getFabAccordingToMenuSelection(selectedMenuItemId, viewModel.user.role.id),
+            ),
+          );
+        });
+  }
+
+  Widget _buildUI(int selectedMenuItemId, BuildContext context) {
+    switch(selectedMenuItemId) {
+      case 0: return DashBoardPage();
+      case 1: return PublicHolidayPage();
+      case 2: return UserManagementPage();
+      case 3: return ProjectManagementPage();
+      case 4: {
+        logoutUser(context);
+        return Container(
+          color: Colors.transparent,
+          child: Center(),
+        );
+      }
+      default: return Center();
     }
   }
 
-  Widget _landscapeWidget() {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          flex: 1,
-          child: Container(
-            constraints: BoxConstraints.expand(),
-            child: ProfileHeaderWidget(_fraction),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: SafeArea(
-            child: Container(
-              constraints: BoxConstraints.expand(),
-              child: AppliedLeaveList(Axis.vertical),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  /*Widget _portraitWidget() {
-    return Column(
-      children: <Widget>[
-        Expanded(
-          flex: 1,
-          child: Container(
-            constraints: BoxConstraints.expand(),
-            color: Colors.blueGrey,
-            child: ProfileHeaderWidget(_fraction),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 22.0),
-            constraints: BoxConstraints.expand(),
-            color: Colors.white,
-            child: AppliedLeaveList(Axis.horizontal),
-          ),
-        ),
-      ],
-    );
-  }*/
-
-
-  Widget _portraitWidget() {
-    return NestedScrollView(
-      controller: _hideButtonController,
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return <Widget>[
-          new SliverAppBar(
-            pinned: true,
-            expandedHeight: MediaQuery.of(context).size.height/2,
-            floating: false,
-            backgroundColor: Colors.transparent,
-            elevation: 0.0,
-            forceElevated: innerBoxIsScrolled,
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: ProfileHeaderWidget(_fraction),
-            ),
-          ),
-        ];
-      },
-      body: AppliedLeaveList(Axis.vertical)
-    );
-  }
-
-
-  void _modalBottomSheetMenu(){
-    showModalBottomSheet(
-        context: context,
-        builder: (builder){
-          return new Container(
-            color: Colors.transparent,
-            child: new Container(
-                decoration: new BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: new BorderRadius.only(
-                        topLeft: const Radius.circular(10.0),
-                        topRight: const Radius.circular(10.0))),
-                child: StoreConnector<AppState, ViewModel>(
-                  converter: (Store<AppState> store) => ViewModel.fromStore(store),
-                  builder: (BuildContext context, ViewModel viewModel) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        ListTile(
-                          title: Text('${viewModel.user.name}'),
-                          subtitle: Text("${viewModel.user.role.title}"),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigation.navigateTo(context, 'profile_page', transition: TransitionType.fadeIn);
-                          },
-                          leading: Icon(Icons.person),
-                        ),
-                        ListTile(
-                          title: Text('Company Leaves'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigation.navigateTo(context, 'public_holiday_management', transition: TransitionType.fadeIn);
-                          },
-                          leading: Icon(Icons.party_mode),
-                        ),
-
-                        getWidgetIfRoleIsHR(viewModel.user),
-
-                        getWidgetIfRoleIsLead(viewModel.user),
-
-                        new ListTile(
-                          title: new Text('Notifications'),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          leading: Icon(Icons.notifications),
-                        ),
-
-                        new ListTile(
-                          title: new Text('Logout'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            logoutUser();
-                          },
-                          leading: Icon(Icons.vpn_key),
-                        ),
-
-                      ],
-                    );
-                  },
-                )
-            ),
-          );
-        }
-    );
-  }
-
-  void logoutUser() async{
-    _firebaseMessaging.unsubscribeFromTopic('');
-
+  void logoutUser(BuildContext context) async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString(LOGGED_IN_USER_MMID, "");
     sharedPreferences.setString(LOGGED_IN_USER_PASSWORD, "");
+
+    var store = StoreProvider.of<AppState>(context);
+    store.dispatch(LogoutUserAction());
+    store.dispatch(ClearAppliedLeaveAction());
+    store.dispatch(ClearPublicHolidayAction());
+    store.dispatch(ClearSelectedEmployeeListAction());
+    store.dispatch(ClearEmployeeListAction());
+    store.dispatch(ClearProjectListAction());
     Navigation.navigateTo(context, 'signin', replace: true, transition: TransitionType.fadeIn);
   }
 
-  Widget getWidgetIfRoleIsHR(User user) {
-    if(user.role.id == 1 || user.role.id == 0) {
-      return ListTile(
-        title: new Text('Employee Management'),
-        onTap: () {
-          Navigator.pop(context);
-          Navigation.navigateTo(context, 'user_management',
-              transition: TransitionType.fadeIn);
-        },
-        leading: Icon(Icons.person_add),
+  Widget getFabAccordingToMenuSelection(int selectedMenuItemId, int id) {
+    switch(selectedMenuItemId) {
+      case 0: return ExtendedFabWidget('Request for leave', () {
+        //Navigation.navigateTo(context, 'leave_request', transition: TransitionType.fadeIn);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                LeaveRequestPage(),
+          ),
+        );
+      });
+      case 1: return IgnorePointer(
+        ignoring: (id != 1),
+        child: Opacity(
+          opacity: (id == 1) ? 1.0 : 0.0,
+          child: ExtendedFabWidget('Add public holiday', () {
+            //Navigation.navigateTo(context, 'add_public_holiday', transition: TransitionType.fadeIn);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    AddPublicHolidayPage(),
+              ),
+            );
+          }),
+        ),
       );
-    } else {
-      return Container();
+      case 2: return ExtendedFabWidget('Add new member', () {
+        Navigation.navigateTo(context, 'add_user', transition: TransitionType.fadeIn);
+      });
+      case 3: return ExtendedFabWidget('Add new project', () {
+        Navigation.navigateTo(context, 'select_user_for_project', transition: TransitionType.fadeIn);
+      });
+      case 4: return ExtendedFabWidget('logout', () {
+        Navigation.navigateTo(context, 'select_user_for_project', transition: TransitionType.fadeIn);
+      });
+      default: return Center();
     }
   }
+}
 
-  Widget getWidgetIfRoleIsLead(User user) {
-    if(user.role.id == 5 || user.role.id == 6 || user.role.id == 0) {
-      return ListTile(
-        title: Text('Project Management'),
-        leading: Icon(Icons.work),
-        onTap: () {
-          Navigator.pop(context);
-          Navigation.navigateTo(context, 'project_management',
-              transition: TransitionType.fadeIn);
-        },
-      );
-    } else {
-      return Container();
-    }
+class HomeViewModel {
+  final User user;
+
+  final List<Leave> leaveList;
+
+  HomeViewModel({
+    @required this.user,
+    this.leaveList
+  });
+
+  static HomeViewModel fromStore(Store<AppState> store) {
+    return HomeViewModel(user: store.state.loginState.user, leaveList: store.state.appliedLeaveState.leaveList);
   }
 }

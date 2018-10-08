@@ -35,15 +35,15 @@ class Project{
 class ProjectUser{
 
   ProjectUser({
-    @required this.name,
-    @required this.mmid,
-    @required this.isManager,
+     this.name,
+     this.mmid,
+     this.isManager,
   });
 
 
-  String name;
-  String mmid;
-  bool isManager;
+  @required String name;
+  @required String mmid;
+  @required bool isManager;
 
   factory ProjectUser.fromJson(Map<dynamic, dynamic> parsedJson) {
     return ProjectUser(

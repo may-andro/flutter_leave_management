@@ -29,7 +29,7 @@ class TextLabelWidget extends StatelessWidget {
               ),
             ),
           ),
-          padding: EdgeInsets.all(4.0),
+          padding: EdgeInsets.all(8.0),
         ),
         color: backgroundColor,
       ),

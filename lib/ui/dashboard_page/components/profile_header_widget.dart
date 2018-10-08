@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/ViewModel.dart';
+import 'package:flutter_mm_hrmangement/utility/text_theme.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
 
 class ProfileHeaderWidget extends StatelessWidget {
 
-  final double fraction;
+  final Animation<double> _animationReveal;
 
-  ProfileHeaderWidget(this.fraction);
+  ProfileHeaderWidget(this._animationReveal);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class ProfileHeaderWidget extends StatelessWidget {
               children: <Widget>[
                 ProfileCircle(
                   screenSize: MediaQuery.of(context).size,
-                  fraction: fraction,
+                  fraction: _animationReveal.value,
                   profileImage: DecorationImage(
                     image: new ExactAssetImage('assets/login.jpg'),
                     fit: BoxFit.cover,
@@ -33,23 +34,17 @@ class ProfileHeaderWidget extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Opacity(
-                    opacity: fraction,
+                    opacity: _animationReveal.value,
                     child: Text(
                       "${viewModel.user.name}",
-                      style: TextStyle(
-                        color: Colors.black87,
-                        letterSpacing: 1.2,
-                        fontStyle: FontStyle.normal,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 35.0,
-                      ),
+                      style: TextStyles.headingStyle,
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(0.0),
                   child: Opacity(
-                    opacity: fraction,
+                    opacity: _animationReveal.value,
                     child: Text(
                       "${viewModel.user.role.title}",
                       style: Theme.of(context).textTheme.caption,
@@ -63,7 +58,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Opacity(
-                        opacity: fraction,
+                        opacity: _animationReveal.value,
                         child: Text(
                           "${viewModel.user.remainingLeaves}",
                           style: TextStyle(
@@ -85,7 +80,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Opacity(
-                            opacity: fraction,
+                            opacity: _animationReveal.value,
                             child: Text(
                               "Leaves",
                               style: Theme.of(context).textTheme.body1,
@@ -93,7 +88,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                           ),
 
                           Opacity(
-                            opacity: fraction,
+                            opacity: _animationReveal.value,
                             child: Text(
                               "Available",
                               style: Theme.of(context).textTheme.body1,

@@ -3,14 +3,18 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
-import 'package:flutter_mm_hrmangement/redux/actions/actions.dart';
+import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_action.dart';
+import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_action.dart';
+import 'package:flutter_mm_hrmangement/redux/login_action/actions.dart';
+import 'package:flutter_mm_hrmangement/redux/public_holiday/public_holiday_action.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
+import 'package:flutter_mm_hrmangement/utility/text_theme.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginFormWidget extends StatefulWidget {
@@ -20,8 +24,6 @@ class LoginFormWidget extends StatefulWidget {
 
 class _LoginFormState extends State<LoginFormWidget>
     with TickerProviderStateMixin {
-
-  OnLoginCallback callback;
 
   Animation<double> _animationReval, _animationShrink;
   AnimationController _controllerReveal, _controllerShrink;
@@ -66,26 +68,19 @@ class _LoginFormState extends State<LoginFormWidget>
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AppState, OnLoginCallback>(
-      converter: (Store<AppState> store) {
-        return (user) => store.dispatch(LoginUserAction(user));
-      },
-        builder: (BuildContext context, OnLoginCallback callback) {
-          return Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Form(
-                key: formKey,
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    createUserIdInputField(),
-                    createUserPinField(),
-                    createForgotPinField(),
-                    createLoginButton(callback),
-                  ],
-                )),
-          );
-        }
+    return Padding(
+      padding: EdgeInsets.all(24.0),
+      child: Form(
+          key: formKey,
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              createUserIdInputField(),
+              createUserPinField(),
+              createForgotPinField(),
+              createLoginButton(),
+            ],
+          )),
     );
   }
 
@@ -202,11 +197,7 @@ class _LoginFormState extends State<LoginFormWidget>
             child: new FlatButton(
               child: new Text(
                 "Forgot Password?",
-                style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey,
-                  fontSize: 15.0,
-                ),
+                style: TextStyles.captionStyle,
                 textAlign: TextAlign.end,
               ),
               onPressed: () => {},
@@ -216,7 +207,7 @@ class _LoginFormState extends State<LoginFormWidget>
       );
   }
 
-  Widget createLoginButton(OnLoginCallback callback){
+  Widget createLoginButton(){
     return Padding(
       padding: EdgeInsets.all(24.0),
       child: Center(
@@ -241,7 +232,7 @@ class _LoginFormState extends State<LoginFormWidget>
                   setState(() {
                     _isPressed = !_isPressed;
                     if (_state == 0) {
-                      animateButton(callback);
+                      animateButton();
                     }
                   });
                 }
@@ -253,11 +244,7 @@ class _LoginFormState extends State<LoginFormWidget>
     );
   }
 
-
-
-
-
-  Future animateButton(OnLoginCallback callback) async {
+  Future animateButton() async {
     double initialWidth = containerKey.currentContext.size.width;
 
     _animationShrink = Tween(begin: 0.0, end: 1.0).animate(_controllerShrink)
@@ -297,9 +284,27 @@ class _LoginFormState extends State<LoginFormWidget>
         prefs.setString(LOGGED_IN_USER_PASSWORD, _password);
         prefs.setString(LOGGED_IN_USER_MMID, _mmid);
 
-        //login;
-        callback(user);
+        List<Leave> leaveList = [];
+        await Firestore.instance.runTransaction((Transaction transaction) async {
+          var snapshot = await Firestore.instance
+              .collection("leaveCollection")
+              .where('mmid', isEqualTo: _mmid)
+              .getDocuments();
 
+          snapshot.documents.forEach((snapshot) {
+            Leave leave = Leave.fromJson(snapshot);
+            leaveList.add(leave);
+          });
+        });
+
+        var store = StoreProvider.of<AppState>(context);
+        store.dispatch(LoginUserAction(user));
+        store.dispatch(FetchAppliedLeaveAction(mmid: user.mmid));
+        store.dispatch(FetchPublicHolidayAction());
+        if(user.role.id == 0 || user.role.id == 1 ||
+            user.role.id == 5 || user.role.id == 6){
+          store.dispatch(FetchEmployeeListAction());
+        }
         setState(() {
           _state = 2;
         });
@@ -374,35 +379,4 @@ class _LoginFormState extends State<LoginFormWidget>
       });
     _controllerReveal.forward();
   }
-
-
-
-
-}
-
-typedef OnLoginCallback = Function(User user);
-
-enum LoginStatusStatus {
-  loading,
-  error,
-  success,
-}
-
-void _showDialog(
-    BuildContext context, String message) {
-  var alert = AlertDialog(
-    title: Text("FCM DEMO"),
-    content: Text(message),
-    actions: <Widget>[
-      FlatButton(
-        color: Colors.transparent,
-        child: Text("Delete"),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      )
-    ],
-  );
-
-  showDialog(context: context, builder: (context) => alert);
 }

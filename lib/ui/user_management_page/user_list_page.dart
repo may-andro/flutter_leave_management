@@ -1,77 +1,90 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/app_bar_widget.dart';
+import 'package:flutter_mm_hrmangement/components/list_item_card_widget.dart';
+import 'package:flutter_mm_hrmangement/components/no_data_found_widget.dart';
 import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
-import 'package:flutter_mm_hrmangement/utility//Theme.dart' as Theme;
+import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_action.dart';
+import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
+import 'package:flutter_mm_hrmangement/ui/user_management_page/components/user_list_widget.dart';
+import 'package:flutter_mm_hrmangement/utility/navigation.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
-class UserListItemWidget extends StatelessWidget {
-  final User user;
-  final Function showInSnackBar;
+class UserManagementPage extends StatefulWidget {
+  @override
+  _UserManagementPageState createState() => _UserManagementPageState();
+}
 
-  UserListItemWidget({@required this.user, this.showInSnackBar});
+class _UserManagementPageState extends State<UserManagementPage>
+    with TickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  AnimationController _screenController;
+  Animation<double> _animationReveal;
+
+  @override
+  void initState() {
+    super.initState();
+    _screenController = new AnimationController(
+        duration: new Duration(seconds: 1), vsync: this);
+
+    _animationReveal = Tween(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _screenController, curve: Curves.decelerate));
+
+    _screenController.forward();
+  }
+
+  @override
+  void dispose() {
+    _screenController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Divider(
-          height: 5.5,
-        ),
-        ListTile(
-          title: Text(
-            user.name,
-            style: new TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.w400,
-                color: Colors.black87),
-          ),
-          subtitle: new Padding(
-            padding: new EdgeInsets.only(top: 5.0),
-            child: new Text(
-              user.mmid,
-              style: new TextStyle(
-                  color: Colors.black38,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w300),
+    return AnimatedBuilder(
+        animation: _screenController,
+        builder: (BuildContext context, Widget child) {
+          return Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBarWidget("Team Management"),
+            body: Container(
+              color: Colors.white,
+              child: _createContent(context),
             ),
-          ),
-          leading:
-              CircleAvatar(backgroundColor: Colors.deepPurple, child: getAvatar()),
-          trailing: IconButton(
-            icon: new Icon(
-              Icons.delete,
-              color: Colors.black87,
-            ),
-            onPressed: () {
-              //delete the user
-              _showDialog(
-                  context,
-                  "Would you like to delete ${user.mmid} from mutual mobile database",
-                  user,
-                  showInSnackBar);
-            },
-          ),
-          onTap: () {},
-        )
-      ],
-    );
+          );
+        });
   }
 
-  Widget getAvatar() {
-    if (user.avatar.isEmpty) {
-      return Text(
-        "${user.role.shortcut}",
-        style: TextStyle(color: Colors.white),
-      );
-    } else {
-      return Text(
-        "${user.avatar.substring(0, 1)}",
-        style: TextStyle(color: Colors.white),
-      );
-    }
+
+  Widget _createContent(BuildContext context) {
+    return StoreConnector<AppState, UserManagementViewModel>(
+        converter: (Store<AppState> store) => UserManagementViewModel.fromStore(store),
+        builder: (BuildContext context, UserManagementViewModel viewModel) {
+          if(viewModel.employeeList.length > 1) {
+            return UserListWidget(
+              viewModel.employeeList, (user) {
+                var store = StoreProvider.of<AppState>(context);
+                store.dispatch(DeleteEmployeeAction(user: user));
+                showInSnackBar("${user.name} deleted successfully");
+                },
+                _animationReveal,
+                true
+            );
+          } else {
+            return NoDataFoundWidget('No user found');
+          }
+        });
+  }
+
+  void showInSnackBar(String value) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(value)));
   }
 }
 
@@ -159,4 +172,17 @@ void _showDialog(
   );
 
   showDialog(context: context, builder: (context) => alert);
+}
+
+class UserManagementViewModel {
+  final User user;
+  final List<User> employeeList;
+  UserManagementViewModel({
+    @required this.user,
+    @required this.employeeList
+  });
+
+  static UserManagementViewModel fromStore(Store<AppState> store) {
+    return new UserManagementViewModel(user: store.state.loginState.user, employeeList: store.state.employeeManagementState.employeeList);
+  }
 }

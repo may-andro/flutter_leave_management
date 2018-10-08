@@ -1,25 +1,26 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluro/fluro.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mm_hrmangement/components/date_time_picker_widget.dart';
 import 'package:flutter_mm_hrmangement/components/loading_widget.dart';
+import 'package:flutter_mm_hrmangement/components/text_label_widget.dart';
 import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
-import 'package:flutter_mm_hrmangement/components/text_label_widget.dart';
+import 'package:flutter_mm_hrmangement/ui/leave_request_page/components/label_widget.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-
-
 
 class LeaveRequestPage extends StatefulWidget {
   @override
@@ -44,9 +45,16 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
   int _state = 0;
   double _width = double.infinity;
 
+  var leaveId = '';
   bool isSingleDaySelected = true;
 
   List<DropdownMenuItem<String>> _dropDownMenuItemsForTypeOfLeavel;
+
+  final TextEditingController textEditingController = TextEditingController();
+
+  final AsyncMemoizer _memoizer = AsyncMemoizer();
+  List<ProjectUser> teamList = [];
+  List<String> fcmTokenList = [];
 
   @override
   void deactivate() {
@@ -81,7 +89,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     _state = 0;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,17 +106,25 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     );
   }
 
-  final AsyncMemoizer _memoizer = AsyncMemoizer();
-  List<ProjectUser> teamList = [];
-  List<String> fcmTokenList = [];
-
   Future _fetchData(User user) {
     return this._memoizer.runOnce(() async {
-      Map<String,dynamic> projectUserMap = {};
+      Map<String, dynamic> projectUserMap = {};
       projectUserMap["mmid"] = '${user.mmid}';
       projectUserMap["name"] = '${user.name}';
-      projectUserMap["isManager"] = (user.role.id == 0 || user.role.id == 1 || user.role.id == 4 || user.role.id == 5 || user.role.id == 6) ? true: false;
+      projectUserMap["isManager"] = (user.role.id == 0 ||
+              user.role.id == 1 ||
+              user.role.id == 4 ||
+              user.role.id == 5 ||
+              user.role.id == 6)
+          ? true
+          : false;
       print('projectUserMap data: $projectUserMap');
+
+      var data1 = await Firestore.instance
+          .collection("projectCollection")
+          .getDocuments();
+      print('projectUserMap data: ${data1.documents.length}');
+
       var data = await Firestore.instance
           .collection("projectCollection")
           .where('team', arrayContains: projectUserMap)
@@ -118,7 +133,9 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
       data.documents.map<Widget>((DocumentSnapshot documentSnapshot) {
         Project project = Project.fromJson(documentSnapshot.data);
         project.team.forEach((projectUser) {
-          if(!teamList.contains(projectUser) && projectUser.isManager && projectUser.mmid != user.mmid) {
+          if (!teamList.contains(projectUser) &&
+              projectUser.isManager &&
+              projectUser.mmid != user.mmid) {
             teamList.add(projectUser);
             print('projectUser data: ${projectUser}');
           }
@@ -126,7 +143,11 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
       }).toList();
 
       teamList.forEach((projectUser) {
-        Firestore.instance.collection("fcmCollection").document(projectUser.mmid).get().then((snapshot) {
+        Firestore.instance
+            .collection("fcmCollection")
+            .document(projectUser.mmid)
+            .get()
+            .then((snapshot) {
           fcmTokenList.add(snapshot['token']);
         });
       });
@@ -145,11 +166,13 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
             future: _fetchData(viewModel.user),
             builder: (context, AsyncSnapshot snapShot) {
               if (!snapShot.hasData) {
-                return Center(
-                  child: Container(
-                      color: Colors.white,
-                      child: LoadingWidget("Fetching data")
-                  ),
+                return Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Container(
+                        color: Colors.pinkAccent,
+                        child: LoadingWidget("Fetching data..."))
+                  ],
                 );
               } else {
                 return Stack(
@@ -162,56 +185,63 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.all(24.0),
-                              child: Column(children: <Widget>[
-                                new Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
+                                LabelWidget(
+                                    'Single day',
+                                    isSingleDaySelected
+                                        ? Colors.deepPurple
+                                        : Colors.white,
+                                    isSingleDaySelected
+                                        ? Colors.white
+                                        : Colors.grey,
+                                    'Multiple Day',
+                                    !isSingleDaySelected
+                                        ? Colors.deepPurple
+                                        : Colors.white,
+                                    !isSingleDaySelected
+                                        ? Colors.white
+                                        : Colors.grey, () {
+                                  setState(() {
+                                    isSingleDaySelected = true;
+                                  });
+                                }, () {
+                                  setState(() {
+                                    isSingleDaySelected = false;
+                                  });
+                                }),
 
-                                    TextLabelWidget('Single day',
-                                        isSingleDaySelected ? Colors.white : Colors.grey,
-                                        isSingleDaySelected ? Colors.deepPurple : Colors.white, () {
-                                          setState(() {
-                                            isSingleDaySelected = true;
-                                          });
-                                        }),
-
-                                    TextLabelWidget('Multiple Day',
-                                        !isSingleDaySelected ? Colors.white : Colors.grey,
-                                        !isSingleDaySelected ? Colors.deepPurple : Colors.white, () {
-                                      setState(() {
-                                        isSingleDaySelected = false;
-                                      });
-                                    }),
-                                  ],
-                                ),
                                 createDatePickerDependingOnLeaveDays(),
+
                                 Padding(
                                   padding: const EdgeInsets.all(20.0),
                                 ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    TextLabelWidget('Request To', Colors.white, Colors.deepPurple, () {}),
-                                    TextLabelWidget('Dummy', Colors.white, Colors.white, () {}),
-                                  ],
-                                ),
-                                createLeaveTypeDropDown(),
+
+                                LabelWidget(
+                                    'Leave type',
+                                    Colors.deepPurple,
+                                    Colors.white,
+                                    'Dummy',
+                                    Colors.white,
+                                    Colors.white, () {}, () {}
+                                    ),
+
+                                createLeaveTypeDropDown(context, viewModel.user),
+
                                 Padding(
                                   padding: const EdgeInsets.all(20.0),
                                 ),
-                                new Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    TextLabelWidget('Leave Type', Colors.white, Colors.deepPurple, () {}),
-                                    TextLabelWidget('Dummy', Colors.white, Colors.white, () {}),
-                                  ],
+
+                                LabelWidget(
+                                    'Request to',
+                                    Colors.deepPurple,
+                                    Colors.white,
+                                    'Dummy',
+                                    Colors.white,
+                                    Colors.white, () {}, () {}
                                 ),
+
                                 new Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
@@ -221,8 +251,9 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                       child: Container(
                                         child: Padding(
                                           child: Wrap(
-                                              children: getFilterChips( snapShot.data,
-                                                viewModel.user)
+                                              children: getFilterChips(
+                                                      snapShot.data,
+                                                      viewModel.user)
                                                   .map((Widget chip) {
                                             return new Padding(
                                               padding:
@@ -238,7 +269,27 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                     ),
                                   ],
                                 ),
+
+                                Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                ),
+
+                                LabelWidget(
+                                    'Your message',
+                                    Colors.deepPurple,
+                                    Colors.white,
+                                    'Dummy',
+                                    Colors.white,
+                                    Colors.white, () {}, () {}
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(getLeaveMessage(_toDate.compareTo(_fromDate), _toDate, _fromDate, textEditingController.text, _typeOfLeave, viewModel.user.name)),
+                                ),
+
                                 new Padding(padding: new EdgeInsets.all(20.0)),
+
                                 Padding(
                                   padding: EdgeInsets.all(24.0),
                                   child: Center(
@@ -266,8 +317,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                             setState(() {
                                               _isPressed = !_isPressed;
                                               if (_state == 0) {
-                                                animateButton(
-                                                    viewModel.user);
+                                                animateButton(viewModel.user);
                                               }
                                             });
                                           },
@@ -276,8 +326,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
                                     ),
                                   ),
                                 ),
-                              ]
-                              ),
+                              ]),
                             ),
                           ],
                         ),
@@ -300,7 +349,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     return items;
   }
 
-  Widget createLeaveTypeDropDown() {
+  Widget createLeaveTypeDropDown(BuildContext context, User user) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
       child: InputDecorator(
@@ -320,6 +369,7 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
               onChanged: (String newValue) {
                 setState(() {
                   _typeOfLeave = newValue;
+                  _showDialog(context);
                 });
               },
               items: getDropDownMenuItemsForLeaveType(),
@@ -330,7 +380,64 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     );
   }
 
-  void animateButton(User user) async{
+
+  void _showDialog(
+      BuildContext context) {
+    var alert = AlertDialog(
+      title: Text("Generate your message"),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Here is an example',
+            style: Theme.of(context).textTheme.subhead,),
+            Text('I have to an appointment with doctor at 2pm.',
+              style: Theme.of(context).textTheme.body2,),
+
+            Padding(
+              padding: EdgeInsets.all(6.0),
+            ),
+
+            Text('Tip',
+              style: Theme.of(context).textTheme.subhead),
+            Text('Keep it short and to the point, we will generate you a message',
+                style: Theme.of(context).textTheme.caption),
+
+            Padding(
+              padding: EdgeInsets.all(16.0),
+            ),
+
+            TextFormField(
+              textCapitalization: TextCapitalization.sentences,
+              controller: textEditingController,
+              keyboardType: TextInputType.text,
+              onSaved: (String val) {
+              },
+              decoration: InputDecoration(
+                labelText: 'Your reason',
+                hintText: 'Enter your reason',
+                errorMaxLines: 1,
+                hintStyle: TextStyle(color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          color: Colors.transparent,
+          child: Text("Done"),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        )
+      ],
+    );
+
+    showDialog(context: context, builder: (context) => alert);
+  }
+
+  void animateButton(User user) async {
     double initialWidth = _globalKey.currentContext.size.width;
 
     _animationShrink = Tween(begin: 0.0, end: 1.0).animate(_controllerShrink)
@@ -345,15 +452,18 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     setState(() {
       _state = 1;
     });
-    
+
     print("dates are $_fromDate  $_toDate ${fcmTokenList.length}");
     fcmTokenList.forEach((token) {
       sendNotification(token, user);
     });
 
+    leaveId = '${user.mmid}_${DateTime.now()}';
+
     Firestore.instance.runTransaction((Transaction transaction) async {
-      CollectionReference reference = Firestore.instance.collection('leaveCollection');
-      await reference.document().setData({
+      CollectionReference reference =
+          Firestore.instance.collection('leaveCollection');
+      await reference.document(leaveId).setData({
         "mmid": "${user.mmid}",
         "typeOfLeave": "$_typeOfLeave",
         "startDate": _fromDate,
@@ -373,22 +483,20 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     });
   }
 
-  void sendNotification(String sendingToken, User user) async{
+  void sendNotification(String sendingToken, User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var fcm_token = prefs.getString(FIREBASE_FCM_TOKEN);
     var base = 'https://us-central1-mm-leavemanagement.cloudfunctions.net/';
     String dataURL = '$base/sendNotification?'
         'to=${sendingToken}'
         '&fromPushId=$fcm_token'
-        '&fromId=${user.mmid}'
+        '&fromId=$leaveId'
         '&fromName=${user.name}'
-        '&fromMessage=${getLeaveMessage(_toDate.compareTo(_fromDate), _toDate, _fromDate, "", _typeOfLeave, user.name)}'
+        '&fromMessage=${getLeaveMessage(_toDate.compareTo(_fromDate), _toDate, _fromDate, textEditingController.text, _typeOfLeave, user.name)}'
         '&isApproved=false'
         '&type=leave_request';
     print(dataURL);
-    await http.get(dataURL).then((response) {
-
-    });
+    await http.get(dataURL).then((response) {});
   }
 
   void reveal() {
@@ -402,8 +510,8 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
         if (state == AnimationStatus.completed) {
           Router().printTree();
 
-          Navigation.navigateTo(context, 'home', replace: true,
-              transition: TransitionType.fadeIn);
+          Navigation.navigateTo(context, 'home',
+              replace: true, transition: TransitionType.fadeIn);
         }
       });
     _controllerReveal.forward();
@@ -438,7 +546,8 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
   }
 
   List<Widget> getStringFilterChips(List<ProjectUser> managerList) {
-    List<Widget> filterChips = managerList.map<Widget>((ProjectUser projectUser) {
+    List<Widget> filterChips =
+        managerList.map<Widget>((ProjectUser projectUser) {
       return new InputChip(
         avatar: Container(
             child: new CircleAvatar(
@@ -460,7 +569,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     return filterChips;
   }
 
-
   List<Widget> getFilterChips(List<ProjectUser> documents, User user) {
     print('senders are ${documents.length}');
     print('tokens are ${fcmTokenList.length}');
@@ -468,7 +576,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     filterChips.addAll(getStringFilterChips(documents));
     return filterChips;
   }
-
 
   Widget createDatePickerDependingOnLeaveDays() {
     if (isSingleDaySelected) {
@@ -496,7 +603,8 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
     }
   }
 
-  Widget createTextFormFieldForDate(DateTime date, String label, Function onSelect) {
+  Widget createTextFormFieldForDate(
+      DateTime date, String label, Function onSelect) {
     return Padding(
         padding: const EdgeInsets.only(top: 12.0, left: 16.0),
         child: DateTimePicker(
@@ -507,7 +615,6 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
   }
 }
 
-
 class _ViewModel {
   final User user;
 
@@ -516,15 +623,24 @@ class _ViewModel {
   });
 
   static _ViewModel fromStore(Store<AppState> store) {
-    return new _ViewModel(user: store.state.user);
+    return new _ViewModel(user: store.state.loginState.user);
   }
 }
 
 
-String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate, String reason, String typeOfLeave, String name) {
-  String vocationalMessage =  'Hi Team!'
+String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate,
+    String reason, String typeOfLeave, String name) {
+
+  print(DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000)));
+  print(DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_toDate.millisecondsSinceEpoch * 1000)));
+  print(_toDate.difference(_fromDate).inDays);
+
+  String vocationalMessage = 'Hi Team!'
       '\n\n'
-      'I would like to reuest for ${dayCount} day leave to spend time with my family and friends from ${_fromDate} to ${_toDate}.'
+      'I would like to reuest for ${dayCount} ${dayCount > 1 ? 'days' : 'day '}'
+      ' leave to spend time with my family and friends '
+      '${dayCount > 1 ? 'from ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000))} to ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_toDate.millisecondsSinceEpoch * 1000))}.'
+      : 'on ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000))} '} '
       'I will available on phone and email in case of any need/assiatance.'
       '\n'
       'I request you to grant me the requested leaves'
@@ -533,26 +649,28 @@ String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate, Strin
       '\n'
       '$name';
 
-  String sickLeaveMessage =  'Hi Team!'
+  String sickLeaveMessage = 'Hi Team!'
       '\n\n'
-      'I would like to reuest for ${dayCount} day leave since $reason.'
+      'I would like to reuest for ${dayCount} ${dayCount > 1 ? 'days' : 'day '} sick leave ${dayCount > 1 ? 'from ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000))} to ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_toDate.millisecondsSinceEpoch * 1000))}.'
+      : 'on ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000))} '} '
+      '. $reason'
       '\n'
       'I request you to grant me the requested sick leaves'
       '\n\n'
       'Your truly'
       '\n'
       '$name';
-  String workFromHomeMessage =  'Hi Team!'
+  String workFromHomeMessage = 'Hi Team!'
       '\n\n'
-      'I would like to reuest for work from home on $_toDate as $reason.'
+      'I would like to reuest for work from home on ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000))} as $reason.'
       'I will available on phone, Slack, Hangout and email to collaborate with the team mates and fullfill my duities for the day.'
       '\n'
-      'I request you to grant me the work from home for $_toDate'
+      'I request you to grant me the work from home for ${DateFormat.yMMMMd().format(DateTime.fromMicrosecondsSinceEpoch(_fromDate.millisecondsSinceEpoch * 1000))}'
       '\n\n'
       'Your truly'
       '\n'
       '$name';
-  switch(typeOfLeave) {
+  switch (typeOfLeave) {
     case "Vacation and Family":
       return vocationalMessage;
     case "Sick Leave/ Emergency Leave":
@@ -561,5 +679,4 @@ String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate, Strin
       return workFromHomeMessage;
   }
 }
-
 

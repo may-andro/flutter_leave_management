@@ -2,19 +2,16 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/app_bar_widget.dart';
+import 'package:flutter_mm_hrmangement/components/app_button_widget.dart';
 import 'package:flutter_mm_hrmangement/components/loading_widget.dart';
 import 'package:flutter_mm_hrmangement/components/no_data_found_widget.dart';
-import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
 import 'package:flutter_mm_hrmangement/model/RoleModel.dart';
+import 'package:flutter_mm_hrmangement/model/UserModel.dart';
+import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_action.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
-import 'package:flutter_mm_hrmangement/ui/signin_page/components/reveal_progress_button_painter.dart';
-import 'package:flutter_mm_hrmangement/utility/constants.dart';
-import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:redux/redux.dart';
-import 'dart:convert';
 
 class AddUserPage extends StatefulWidget {
   @override
@@ -23,26 +20,16 @@ class AddUserPage extends StatefulWidget {
 
 class _AddUserPageState extends State<AddUserPage>
     with TickerProviderStateMixin {
-  //Animation
-  Animation<double> _animationReval, _animationShrink;
-  AnimationController _controllerReveal, _controllerShrink;
 
   //Keys
   final formKey = GlobalKey<FormState>();
   final _globalKey = GlobalKey();
 
-  String _authLevel;
   String _mmid;
   String _password;
   String _name;
   int _numberOfHoliday;
-  String _department;
   Role _userRole;
-
-  double _fraction = 0.0;
-  var _isPressed = false, _animatingReveal = false;
-  int _state = 0;
-  double _width = double.infinity;
 
   List<DropdownMenuItem<Role>> _dropDownMenuItemsForRole;
   List<DropdownMenuItem<int>> _dropDownMenuItemsForNumberOfHoliday;
@@ -50,37 +37,11 @@ class _AddUserPageState extends State<AddUserPage>
   final AsyncMemoizer _memoizer = AsyncMemoizer();
 
   @override
-  void deactivate() {
-    reset();
-    super.deactivate();
-  }
-
-  @override
-  dispose() {
-    _controllerReveal.dispose();
-    _controllerShrink.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
-
-    _controllerReveal = AnimationController(
-        duration: const Duration(milliseconds: 1000), vsync: this);
-
-    _controllerShrink = AnimationController(
-        duration: const Duration(milliseconds: 1000), vsync: this);
-
     _dropDownMenuItemsForNumberOfHoliday =
         getDropDownMenuItemsForNumberOfHoliday();
     _numberOfHoliday = _dropDownMenuItemsForNumberOfHoliday[0].value;
-  }
-
-  void reset() {
-    _width = double.infinity;
-    _animatingReveal = false;
-    _state = 0;
   }
 
   Future _fetchData() {
@@ -101,16 +62,7 @@ class _AddUserPageState extends State<AddUserPage>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _globalKey,
-      appBar: AppBar(
-        elevation: 0.0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        title: new Text(
-          "Add New Member",
-          style: TextStyle(color: Colors.black),
-        ),
-      ),
+      appBar: AppBarWidget("Add New Member"),
       body: buildBody(),
     );
   }
@@ -149,48 +101,32 @@ class _AddUserPageState extends State<AddUserPage>
                               )
                           ),
 
-                          Padding(
-                            padding: EdgeInsets.all(24.0),
-                            child: Center(
-                              child: CustomPaint(
-                                painter: RevealProgressButtonPainter(
-                                    _fraction,
-                                    MediaQuery.of(context).size),
-                                child: Container(
-                                  height: 48.0,
-                                  width: _width,
-                                  child: RaisedButton(
-                                    elevation: calculateElevation(),
-                                    shape: new RoundedRectangleBorder(
-                                        borderRadius:
-                                        new BorderRadius.circular(
-                                            30.0)),
-                                    padding: EdgeInsets.all(0.0),
-                                    color: _state == 2
-                                        ? Colors.deepPurple
-                                        : Colors.black,
-                                    child: buildButtonChild(),
-                                    onPressed: () {
-                                      //do the login
-                                      if (formKey.currentState
-                                          .validate()) {
-                                        formKey.currentState.save();
+                          AppButtonWidget(
+                                  () {
+                                    if (formKey.currentState.validate()) {
+                                      formKey.currentState.save();
 
-                                        setState(() {
-                                          _isPressed = !_isPressed;
-                                          if (_state == 0) {
-                                            animateButton();
-                                          }
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                                      var role = Role(
+                                        id : _userRole.id,
+                                        title : "${_userRole.title}",
+                                        shortcut : "${_userRole.shortcut}",
+                                      );
 
+                                      User user = User(
+                                        mmid: _mmid,
+                                        name: _name,
+                                        avatar: '',
+                                        role: role,
+                                        remainingLeaves: _numberOfHoliday,
+                                        totalLeaves: _numberOfHoliday
+                                      );
 
+                                      var store = StoreProvider.of<AppState>(context);
+                                      store.dispatch(AddEmployeeAction(user: user, password: _password));
+                                      Navigator.pop(context);
+                                    }
+                              }, 'Add'
+                          )
                         ],
                       ),
                     ),
@@ -353,119 +289,5 @@ class _AddUserPageState extends State<AddUserPage>
     });
 
     return _dropdownMenuItem;
-  }
-
-  void animateButton() {
-    double initialWidth = _globalKey.currentContext.size.width;
-
-    _animationShrink = Tween(begin: 0.0, end: 1.0).animate(_controllerShrink)
-      ..addListener(() {
-        setState(() {
-          _width =
-              initialWidth - ((initialWidth - 48.0) * _animationShrink.value);
-        });
-      });
-    _controllerShrink.forward();
-
-    setState(() {
-      _state = 1;
-    });
-
-    Firestore.instance.runTransaction((Transaction transaction) async {
-      var role = {
-        "id" : _userRole.id,
-        "title" : "${_userRole.title}",
-        "shortcut" : "${_userRole.shortcut}",
-      };
-
-      CollectionReference reference = Firestore.instance.collection('userCollection');
-      await reference.document(_mmid).setData({
-        "mmid": "$_mmid",
-        "name": "$_name",
-        "avatar": "",
-        "role": role,
-        "remainingLeaves": _numberOfHoliday,
-        "totalLeaves": _numberOfHoliday,
-      });
-    });
-
-    Firestore.instance.runTransaction((Transaction transaction) async {
-      CollectionReference reference = Firestore.instance.collection('pinCollection');
-      await reference.document(_mmid).setData({
-        "mmid": "$_mmid",
-        "pin": "$_password",
-      });
-    });
-
-
-    Firestore.instance.runTransaction((transaction) async {
-      var snapshot = await Firestore.instance.collection('projectCollection').document('hyd_pto_planning').get();
-      Project project = Project.fromJson(snapshot.data);
-      print(json.encode(project.team));
-      project.team.add(ProjectUser(
-          name: '$_name',
-          mmid: '$_mmid',
-          isManager: (_userRole.id == 0 || _userRole.id == 1 || _userRole.id == 4 || _userRole.id == 5 || _userRole.id == 6) ? true: false));
-      print(json.encode(project));
-      var updatedTeam = project.team.map((projectUser) {
-        Map<String,dynamic> projectUserMap = new Map<String,dynamic>();
-        projectUserMap["mmid"] = projectUser.mmid;
-        projectUserMap["name"] = projectUser.name;
-        projectUserMap["isManager"] = projectUser.isManager;
-        print(projectUserMap);
-        return projectUserMap;
-      }).toList();
-      await transaction.update(snapshot.reference, {"team": updatedTeam});
-      setState(() {
-        _state = 2;
-      });
-      _animatingReveal = true;
-      reveal();
-    });
-  }
-
-  void reveal() {
-    _animationReval = Tween(begin: 0.0, end: 1.0).animate(_controllerReveal)
-      ..addListener(() {
-        setState(() {
-          _fraction = _animationReval.value;
-        });
-      })
-      ..addStatusListener((AnimationStatus state) {
-        if (state == AnimationStatus.completed) {
-          print("Animation completd");
-          Navigation.navigateTo(context, 'user_management',
-              replace: true, transition: TransitionType.fadeIn);
-        }
-      });
-    _controllerReveal.forward();
-  }
-
-  Widget buildButtonChild() {
-    if (_state == 0) {
-      return Text(
-        'Add',
-        style: TextStyle(color: Colors.white, fontSize: 16.0),
-      );
-    } else if (_state == 1) {
-      return SizedBox(
-        height: 36.0,
-        width: 36.0,
-        child: CircularProgressIndicator(
-          value: null,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-      );
-    } else {
-      return Icon(Icons.check, color: Colors.white);
-    }
-  }
-
-  double calculateElevation() {
-    if (_animatingReveal) {
-      return 0.0;
-    } else {
-      return _isPressed ? 6.0 : 4.0;
-    }
   }
 }

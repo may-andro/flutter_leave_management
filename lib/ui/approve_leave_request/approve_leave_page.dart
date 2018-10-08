@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
@@ -11,7 +12,7 @@ class ApproveLeavePage extends StatelessWidget {
   final Map<dynamic, dynamic> notificationMessage;
 
   ApproveLeavePage(this.notificationMessage);
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,15 +22,15 @@ class ApproveLeavePage extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.black),
         backgroundColor: Colors.white,
         title: new Text(
-          "Approve Leave",
+          (notificationMessage['type'] == 'leave_approved')? "Leave Status": 'Approve Leave',
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body: buildContent(),
+      body: buildContent(context),
     );
   }
 
-  Widget buildContent() {
+  Widget buildContent(BuildContext context) {
     return StoreConnector<AppState, _ViewModel>(
         converter: (Store<AppState> store) => _ViewModel.fromStore(store),
         builder: (BuildContext context, _ViewModel viewModel) {
@@ -58,7 +59,7 @@ class ApproveLeavePage extends StatelessWidget {
                         ),
                       ),
 
-                      getButtonsDependingOnNotificationType(viewModel.user),
+                      getButtonsDependingOnNotificationType(viewModel.user, context),
 
                     ],
                   ),
@@ -71,10 +72,25 @@ class ApproveLeavePage extends StatelessWidget {
         });
   }
 
-  Widget getButtonsDependingOnNotificationType(User user) {
+  Widget getButtonsDependingOnNotificationType(User user, BuildContext context) {
     print(notificationMessage['isApproved']);
     if((notificationMessage['type'] == 'leave_approved')) {
-      return Center();
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(
+              '${notificationMessage['fromName']} has ${(notificationMessage['isApproved'] == 'true') ? 'approved': 'declined'} your leave.',
+              style: TextStyle(
+                color: (notificationMessage['isApproved'] == 'true') ? Colors.green: Colors.red,
+                letterSpacing: 1.2,
+                fontFamily: 'Poppins',
+                fontStyle: FontStyle.normal,
+                fontWeight: FontWeight.w600,
+                fontSize: 20.0,
+              )
+          ),
+        ),
+      );
     } else {
       return Container(
           height: 48.0,
@@ -100,7 +116,9 @@ class ApproveLeavePage extends StatelessWidget {
                         notificationMessage['fromPushId'],
                         user,
                         notificationMessage['fromMessage'],
-                        false);
+                        false,
+                        notificationMessage['fromId'],
+                    context);
                   }),
               RaisedButton(
                   elevation: 6.0,
@@ -119,7 +137,8 @@ class ApproveLeavePage extends StatelessWidget {
                         notificationMessage['fromPushId'],
                         user,
                         notificationMessage['fromMessage'],
-                        true);
+                        true,
+                        notificationMessage['fromId'],context);
                   }),
             ],
           )
@@ -151,20 +170,34 @@ class ApproveLeavePage extends StatelessWidget {
 
 
 void sendNotification(
-    String sendingToken, User user, String message, bool isApproved) async {
+    String sendingToken,
+    User user,
+    String message,
+    bool isApproved,
+    String leaveId, BuildContext context) async {
+
+  Firestore.instance.runTransaction((Transaction transaction) async {
+    await Firestore.instance.collection('leaveCollection').document(leaveId).updateData({
+      "status": isApproved ? 1 : 2,
+    });
+  });
+  
+  
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var fcm_token = prefs.getString(FIREBASE_FCM_TOKEN);
   var base = 'https://us-central1-mm-leavemanagement.cloudfunctions.net/';
   String dataURL = '$base/sendNotification?'
       'to=${sendingToken}'
       '&fromPushId=$fcm_token'
-      '&fromId=${user.mmid}'
+      '&fromId=$leaveId'
       '&fromName=${user.name}'
       '&fromMessage=$message'
       '&isApproved=$isApproved'
       '&type=leave_approved';
   print(dataURL);
   await http.get(dataURL).then((response) {});
+
+  Navigator.pop(context);
 }
 
 
@@ -177,6 +210,6 @@ class _ViewModel {
   });
 
   static _ViewModel fromStore(Store<AppState> store) {
-    return new _ViewModel(user: store.state.user);
+    return new _ViewModel(user: store.state.loginState.user);
   }
 }

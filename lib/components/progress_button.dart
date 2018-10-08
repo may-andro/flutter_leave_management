@@ -1,10 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/reveal_functions.dart';
 
 class ProgressButton extends StatefulWidget {
-  final Function callback;
-  ProgressButton(this.callback);
+  final BaseRevealAndAnimateFunction baseRevealAndAnimateFunction;
+  final VoidCallback reveal;
+  final String label;
+  Function() param2;
+  ProgressButton(this.baseRevealAndAnimateFunction, this.reveal, this.label,this.param2);
+
   @override
   _ProgressButtonState createState() => _ProgressButtonState();
 }
@@ -15,13 +20,15 @@ class _ProgressButtonState extends State<ProgressButton> with TickerProviderStat
   static final int BUTTON_PROGRESS_STATE = 1;
   static final int BUTTON_REVEAL_STATE = 2;
 
+  AnimationController _controller;
+  Animation _animation;
 
-  var _isPressed = false, _animatingReveal = false;
+  GlobalKey _globalKey = GlobalKey();
+
+  var _isPressed = false;
+  var _animatingReveal = false;
   int _state = BUTTON_IDLE_STATE;
   double _width = double.infinity;
-  Animation _animation;
-  GlobalKey _globalKey = GlobalKey();
-  AnimationController _controller;
 
   @override
   void deactivate() {
@@ -64,7 +71,7 @@ class _ProgressButtonState extends State<ProgressButton> with TickerProviderStat
     double initialWidth = _globalKey.currentContext.size.width;
 
     _controller =
-        AnimationController(duration: Duration(milliseconds: 300), vsync: this);
+        AnimationController(duration: Duration(seconds: 1), vsync: this);
     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
       ..addListener(() {
         setState(() {
@@ -75,24 +82,36 @@ class _ProgressButtonState extends State<ProgressButton> with TickerProviderStat
 
     setState(() {
       _state = BUTTON_PROGRESS_STATE;
+      print('_ProgressButtonState.animateButton $_state');
     });
 
-    Timer(Duration(milliseconds: 3300), () {
-      setState(() {
-        _state = BUTTON_REVEAL_STATE;
-      });
-    });
+    widget.baseRevealAndAnimateFunction.animateProgress().then((message) {
+      print('_ProgressButtonState.animateButton $message');
+      if((message as String).isNotEmpty) {
+        widget.param2();
+        _controller.reverse();
+        reset();
+      }  else {
+        Timer(Duration(seconds: 1), () {
+          setState(() {
+            _state = BUTTON_REVEAL_STATE;
+          });
+        });
 
-    Timer(Duration(milliseconds: 3600), () {
-      _animatingReveal = true;
-      widget.callback();
+        Timer(Duration(seconds: 1), () {
+          print('_ProgressButtonState.animateButton $_state');
+          _animatingReveal = true;
+          widget.reveal();
+        });
+      }
     });
   }
+
 
   Widget buildButtonChild() {
     if (_state == BUTTON_IDLE_STATE) {
       return Text(
-        'Login',
+        widget.label,
         style: TextStyle(color: Colors.white, fontSize: 16.0),
       );
     } else if (_state == BUTTON_PROGRESS_STATE) {

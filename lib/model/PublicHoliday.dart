@@ -4,12 +4,12 @@ import 'package:meta/meta.dart';
 class PublicHoliday{
 
   PublicHoliday({
-    @required this.title,
-    @required this.date,
+     this.title,
+     this.date,
   });
 
-  DateTime date;
-  String title;
+  @required DateTime date;
+  @required String title;
 
   factory PublicHoliday.fromJson(DocumentSnapshot snapShot) {
     return PublicHoliday(

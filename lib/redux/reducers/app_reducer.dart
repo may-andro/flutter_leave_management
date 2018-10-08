@@ -1,13 +1,17 @@
-import 'package:flutter_mm_hrmangement/redux/actions/actions.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
-import 'package:flutter_mm_hrmangement/redux/reducers/common_reducer.dart';
-import 'package:flutter_mm_hrmangement/ui/signin_page/redux/login_reducer.dart';
-import 'package:redux/redux.dart' as redux;
+import 'package:flutter_mm_hrmangement/redux/login_action/login_reducer.dart';
+import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_reducer.dart';
+import 'package:flutter_mm_hrmangement/redux/public_holiday/public_leave_reducer.dart';
+import 'package:flutter_mm_hrmangement/redux/project_management_redux/project_management_reducer.dart';
+import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_reducer.dart';
 
 AppState appReducer(AppState state, dynamic action) {
-  return new AppState(
-      loginState: destinationsReducer(state.loginState, action),
-      user: setUserReducer(state.user, action)
+  return AppState(
+      publicHolidayState: publicHolidayReducer(state.publicHolidayState, action),
+      appliedLeaveState: appliedLeaveReducer(state.appliedLeaveState, action),
+      loginState: setUserReducer(state.loginState, action),
+      projectManagementState: projectManagementReducer(state.projectManagementState, action),
+      employeeManagementState: employeeManagementReducer(state.employeeManagementState, action)
   );
 
   //return state.setUser(user: action.user);
