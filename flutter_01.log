@@ -1,0 +1,106 @@
+Flutter crash report; please file at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter --no-color packages upgrade
+
+## exception
+
+YamlException: Error on line 74, column 11: While parsing a block collection, expected '-'.
+          weight: 500
+          ^
+
+```
+#0      Parser._parseBlockSequenceEntry (package:yaml/src/parser.dart:376:5)
+#1      Parser._stateMachine (package:yaml/src/parser.dart:77:16)
+#2      Parser.parse (package:yaml/src/parser.dart:47:19)
+#3      Loader._loadSequence (package:yaml/src/loader.dart:142:23)
+#4      Loader._loadNode (package:yaml/src/loader.dart:84:16)
+#5      Loader._loadMapping (package:yaml/src/loader.dart:165:19)
+#6      Loader._loadNode (package:yaml/src/loader.dart:86:16)
+#7      Loader._loadSequence (package:yaml/src/loader.dart:141:20)
+#8      Loader._loadNode (package:yaml/src/loader.dart:84:16)
+#9      Loader._loadMapping (package:yaml/src/loader.dart:165:19)
+#10     Loader._loadNode (package:yaml/src/loader.dart:86:16)
+#11     Loader._loadMapping (package:yaml/src/loader.dart:165:19)
+#12     Loader._loadNode (package:yaml/src/loader.dart:86:16)
+#13     Loader._loadDocument (package:yaml/src/loader.dart:62:20)
+#14     Loader.load (package:yaml/src/loader.dart:54:20)
+#15     loadYamlDocument (package:yaml/yaml.dart:51:25)
+#16     loadYamlNode (package:yaml/yaml.dart:42:5)
+#17     loadYaml (package:yaml/yaml.dart:34:5)
+#18     FlutterManifest.createFromString (package:flutter_tools/src/flutter_manifest.dart:42:28)
+<asynchronous suspension>
+#19     FlutterManifest.createFromPath (package:flutter_tools/src/flutter_manifest.dart:36:12)
+<asynchronous suspension>
+#20     FlutterProject._readManifest (package:flutter_tools/src/project.dart:128:60)
+<asynchronous suspension>
+#21     FlutterProject.fromDirectory (package:flutter_tools/src/project.dart:42:44)
+<asynchronous suspension>
+#22     FlutterProject.fromPath (package:flutter_tools/src/project.dart:57:58)
+#23     PackagesGetCommand.runCommand (package:flutter_tools/src/commands/packages.dart:83:61)
+<asynchronous suspension>
+#24     FlutterCommand.verifyThenRunCommand (package:flutter_tools/src/runner/flutter_command.dart:372:18)
+#25     _asyncThenWrapperHelper.<anonymous closure> (dart:async/runtime/libasync_patch.dart:77:64)
+#26     _rootRunUnary (dart:async/zone.dart:1132:38)
+#27     _CustomZone.runUnary (dart:async/zone.dart:1029:19)
+#28     _FutureListener.handleValue (dart:async/future_impl.dart:129:18)
+#29     Future._propagateToListeners.handleValueCallback (dart:async/future_impl.dart:642:45)
+#30     Future._propagateToListeners (dart:async/future_impl.dart:671:32)
+#31     Future._complete (dart:async/future_impl.dart:476:7)
+#32     _SyncCompleter.complete (dart:async/future_impl.dart:51:12)
+#33     _AsyncAwaitCompleter.complete.<anonymous closure> (dart:async/runtime/libasync_patch.dart:33:20)
+#34     _rootRun (dart:async/zone.dart:1124:13)
+#35     _CustomZone.run (dart:async/zone.dart:1021:19)
+#36     _CustomZone.bindCallback.<anonymous closure> (dart:async/zone.dart:947:23)
+#37     _microtaskLoop (dart:async/schedule_microtask.dart:41:21)
+#38     _startMicrotaskLoop (dart:async/schedule_microtask.dart:50:5)
+#39     _runPendingImmediateCallback (dart:isolate/runtime/libisolate_patch.dart:115:13)
+#40     _RawReceivePortImpl._handleMessage (dart:isolate/runtime/libisolate_patch.dart:172:5)
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel beta, v0.8.2, on Mac OS X 10.13.6 17G65, locale en-IN)
+    • Flutter version 0.8.2 at /Users/mayankrai/Documents/flutter/flutter
+    • Framework revision 5ab9e70727 (3 weeks ago), 2018-09-07 12:33:05 -0700
+    • Engine revision 58a1894a1c
+    • Dart version 2.1.0-dev.3.1.flutter-760a9690c2
+
+[!] Android toolchain - develop for Android devices (Android SDK 27.0.3)
+    • Android SDK at /Users/mayankrai/Library/Android/sdk
+    • Android NDK at /Users/mayankrai/Library/Android/sdk/ndk-bundle
+    • Platform android-28, build-tools 27.0.3
+    • ANDROID_HOME = /Users/mayankrai/Library/Android/sdk
+    • Java binary at: /Applications/Android Studio.app/Contents/jre/jdk/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 1.8.0_152-release-1024-b01)
+    ! Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses
+
+[!] iOS toolchain - develop for iOS devices
+    ✗ Xcode installation is incomplete; a full installation is necessary for iOS development.
+      Download at: https://developer.apple.com/xcode/download/
+      Or install Xcode via the App Store.
+      Once installed, run:
+        sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    ✗ ios-deploy not installed. To install:
+        brew install ios-deploy
+    ✗ CocoaPods not installed.
+        CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
+        Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
+        For more info, see https://flutter.io/platform-plugins
+      To install:
+        brew install cocoapods
+        pod setup
+
+[✓] Android Studio (version 3.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin version 26.0.1
+    • Dart plugin version 173.4700
+    • Java version OpenJDK Runtime Environment (build 1.8.0_152-release-1024-b01)
+
+[✓] Connected devices (1 available)
+    • SM T813 • e325eaff05908664 • android-arm64 • Android 7.0 (API 24)
+
+! Doctor found issues in 2 categories.
+```

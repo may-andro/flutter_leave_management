@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
+import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_action.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -31,9 +33,30 @@ class ApproveLeavePage extends StatelessWidget {
   }
 
   Widget buildContent(BuildContext context) {
-    return StoreConnector<AppState, _ViewModel>(
-        converter: (Store<AppState> store) => _ViewModel.fromStore(store),
-        builder: (BuildContext context, _ViewModel viewModel) {
+    return StoreConnector<AppState, ApproveLeaveViewModel>(
+        converter: (Store<AppState> store) => ApproveLeaveViewModel.fromStore(store),
+        builder: (BuildContext context, ApproveLeaveViewModel viewModel) {
+
+          if((notificationMessage['type'] == 'leave_approved')) {
+            var tempLeaveList = viewModel.leaveLst.where((leave) =>
+            leave.message == '${notificationMessage['fromMessage']}')
+                .toList();
+            tempLeaveList.forEach((leave) {
+              int index = viewModel.leaveLst.indexOf(leave);
+              if (notificationMessage['isApproved'] == 'true') {
+                leave.status = 1;
+              } else {
+                leave.status = 2;
+              }
+
+              var store = StoreProvider.of<AppState>(context);
+              store.dispatch(UpdateLeaveAction(
+                  index: index,
+                  leave: leave
+              ));
+            });
+          }
+
           return Stack(
             fit: StackFit.expand,
             children: <Widget>[
@@ -59,7 +82,7 @@ class ApproveLeavePage extends StatelessWidget {
                         ),
                       ),
 
-                      getButtonsDependingOnNotificationType(viewModel.user, context),
+                      getButtonsDependingOnNotificationType(viewModel, context),
 
                     ],
                   ),
@@ -72,7 +95,7 @@ class ApproveLeavePage extends StatelessWidget {
         });
   }
 
-  Widget getButtonsDependingOnNotificationType(User user, BuildContext context) {
+  Widget getButtonsDependingOnNotificationType(ApproveLeaveViewModel viewModel, BuildContext context) {
     print(notificationMessage['isApproved']);
     if((notificationMessage['type'] == 'leave_approved')) {
       return Center(
@@ -114,7 +137,7 @@ class ApproveLeavePage extends StatelessWidget {
                   onPressed: () {
                     sendNotification(
                         notificationMessage['fromPushId'],
-                        user,
+                        viewModel.user,
                         notificationMessage['fromMessage'],
                         false,
                         notificationMessage['fromId'],
@@ -135,7 +158,7 @@ class ApproveLeavePage extends StatelessWidget {
                   onPressed: () {
                     sendNotification(
                         notificationMessage['fromPushId'],
-                        user,
+                        viewModel.user,
                         notificationMessage['fromMessage'],
                         true,
                         notificationMessage['fromId'],context);
@@ -202,14 +225,16 @@ void sendNotification(
 
 
 
-class _ViewModel {
+class ApproveLeaveViewModel {
   final User user;
+  final List<Leave> leaveLst;
 
-  _ViewModel({
+  ApproveLeaveViewModel({
     @required this.user,
+    @required this.leaveLst
   });
 
-  static _ViewModel fromStore(Store<AppState> store) {
-    return new _ViewModel(user: store.state.loginState.user);
+  static ApproveLeaveViewModel fromStore(Store<AppState> store) {
+    return new ApproveLeaveViewModel(user: store.state.loginState.user, leaveLst: store.state.appliedLeaveState.leaveList);
   }
 }

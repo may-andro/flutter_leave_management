@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/components/loading_widget.dart';
 import 'package:flutter_mm_hrmangement/components/no_data_found_widget.dart';
 import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
+import 'package:flutter_mm_hrmangement/model/loading_status.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
+import 'package:flutter_mm_hrmangement/ui/leave_request_page/user_leave_detail_page.dart';
 import 'package:flutter_mm_hrmangement/utility/text_theme.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:intl/intl.dart';
@@ -19,23 +22,37 @@ class AppliedLeaveList extends StatelessWidget {
     return StoreConnector<AppState, AppliedLeaveViewModel>(
         converter: (Store<AppState> store) => AppliedLeaveViewModel.fromStore(store),
         builder: (BuildContext context, AppliedLeaveViewModel viewModel) {
-          if(viewModel.leaveList.length > 0) {
-            return ListView.builder(
-              itemCount: viewModel.leaveList.length,
-              padding: const EdgeInsets.all(0.0),
-              shrinkWrap: true,
-              scrollDirection: scrollDirection,
-              primary: true,
-              itemBuilder: (context, index) {
-                return ListItemWidget(leave: viewModel.leaveList[index],
-                    animationReveal: _animationReveal);
-              },
-            );
-          } else {
-            return NoDataFoundWidget(
-                "You have not applied for leaves yet");
+          print('AppliedLeaveList.build ${viewModel.loadingStatus}');
+          switch(viewModel.loadingStatus) {
+            case LoadingStatus.loading: return LoadingWidget('Fetching leaves');
+            case LoadingStatus.idle: return LoadingWidget('Fetching idle');
+            case LoadingStatus.error: return NoDataFoundWidget('Fetching error');
+            case LoadingStatus.failure: return NoDataFoundWidget('Fetching failed');
+            case LoadingStatus.success: return showContent(viewModel);
+            case LoadingStatus.loading: return LoadingWidget('Fetching leaves');
+            default: return LoadingWidget('Fetching leaves');
           }
         });
+  }
+
+
+  Widget showContent(AppliedLeaveViewModel viewModel) {
+    if(viewModel.leaveList.length > 0) {
+      return ListView.builder(
+        itemCount: viewModel.leaveList.length,
+        padding: const EdgeInsets.all(0.0),
+        shrinkWrap: true,
+        scrollDirection: scrollDirection,
+        primary: true,
+        itemBuilder: (context, index) {
+          return ListItemWidget(leave: viewModel.leaveList[index],
+              animationReveal: _animationReveal);
+        },
+      );
+    } else {
+      return NoDataFoundWidget(
+          "You have not applied for leaves yet");
+    }
   }
 }
 
@@ -60,6 +77,7 @@ class ListItemWidget extends StatelessWidget {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Opacity(
@@ -69,6 +87,15 @@ class ListItemWidget extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: (animationReveal.value*12.0), vertical: animationReveal.value*4.0),
         decoration: _buildShadowAndRoundedCorners(),
         child: ListTile(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    LeaveDetailPage(leave),
+              ),
+            );
+          },
           title: Text(
             leave.typeOfLeave,
             style: TextStyles.titleStyle,
@@ -152,13 +179,16 @@ class ListItemWidget extends StatelessWidget {
 
 class AppliedLeaveViewModel {
   final List<Leave> leaveList;
+  final LoadingStatus loadingStatus;
 
   AppliedLeaveViewModel({
-    this.leaveList
+    this.leaveList,
+    this.loadingStatus
   });
 
   static AppliedLeaveViewModel fromStore(Store<AppState> store) {
-    return AppliedLeaveViewModel(leaveList: store.state.appliedLeaveState.leaveList);
+    return AppliedLeaveViewModel(leaveList: store.state.appliedLeaveState.leaveList,
+        loadingStatus: store.state.appliedLeaveState.loadingStatus);
   }
 }
 

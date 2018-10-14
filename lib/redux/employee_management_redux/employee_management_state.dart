@@ -1,6 +1,3 @@
-import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
-import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
-import 'package:flutter_mm_hrmangement/model/PublicHoliday.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/model/loading_status.dart';
 import 'package:meta/meta.dart';
@@ -24,29 +21,41 @@ class EmployeeManagementState {
     );
   }
 
+  EmployeeManagementState copyWith(
+      {
+        LoadingStatus loadingStatus,
+        List<User> employeeList,
+        String errorMessage,
+      }) {
+    return EmployeeManagementState(
+      loadingStatus: loadingStatus ?? this.loadingStatus,
+      employeeList: employeeList ?? this.employeeList,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
   //Employee Management
 
   EmployeeManagementState setEmployeeList({List<User> receivedList, LoadingStatus status, String errorMessage})
   {
     employeeList.addAll(receivedList);
-    return EmployeeManagementState(loadingStatus: status, employeeList: employeeList, errorMessage: errorMessage);
+    return copyWith(loadingStatus: status, employeeList: employeeList, errorMessage: errorMessage);
   }
 
   EmployeeManagementState clearEmployeeList()
   {
     employeeList.clear();
-    return EmployeeManagementState(loadingStatus: LoadingStatus.loading, employeeList: employeeList, errorMessage: '');
+    return copyWith(loadingStatus: LoadingStatus.loading, employeeList: employeeList, errorMessage: '');
   }
 
   EmployeeManagementState deleteEmployee({User user})
   {
     employeeList.remove(user);
-    return EmployeeManagementState(employeeList: employeeList,);
+    return copyWith(employeeList: employeeList,);
   }
 
   EmployeeManagementState addEmployee({User user})
   {
     employeeList.add(user);
-    return EmployeeManagementState(employeeList: employeeList,);
+    return copyWith(employeeList: employeeList,);
   }
 }

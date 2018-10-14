@@ -1,6 +1,4 @@
-
 import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
-import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/model/loading_status.dart';
 import 'package:meta/meta.dart';
 
@@ -22,29 +20,47 @@ class AppliedLeaveState {
     );
   }
 
+  AppliedLeaveState copyWith(
+      {
+        LoadingStatus loadingStatus,
+        List<Leave> leaveList,
+        String errorMessage,
+      }) {
+    return AppliedLeaveState(
+      loadingStatus: loadingStatus ?? this.loadingStatus,
+      leaveList: leaveList ?? this.leaveList,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+
   AppliedLeaveState setLeaveList({List<Leave> receivedList, LoadingStatus status, String errorMessage})
   {
     leaveList.addAll(receivedList);
-    return AppliedLeaveState(leaveList: leaveList, loadingStatus: status, errorMessage: errorMessage);
+    return copyWith(leaveList: leaveList, loadingStatus: status, errorMessage: errorMessage);
   }
 
   AppliedLeaveState clearAppliedLeaveList()
   {
-    print('AppliedLeaveState.clearAppliedLeaveList ${leaveList.length}');
     leaveList.clear();
-    return AppliedLeaveState(loadingStatus: LoadingStatus.loading, leaveList: leaveList, errorMessage: '');
+    return copyWith(loadingStatus: LoadingStatus.loading, leaveList: leaveList, errorMessage: '');
   }
 
   AppliedLeaveState deleteLeave({Leave leave})
   {
     leaveList.remove(leave);
-    return AppliedLeaveState(leaveList: leaveList,);
+    return copyWith(leaveList: leaveList,);
   }
 
   AppliedLeaveState addLeave({Leave leave})
   {
     leaveList.add(leave);
-    return AppliedLeaveState(leaveList: leaveList,);
+    return copyWith(leaveList: leaveList,);
+  }
+
+  AppliedLeaveState updateLeave({Leave leave, int index})
+  {
+    leaveList[index] = leave;
+    return copyWith(leaveList: leaveList,);
   }
 
 }

@@ -13,6 +13,7 @@ class EmployeeManagementMiddleware extends MiddlewareClass<AppState> {
   Future<Null> call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is FetchEmployeeListAction) {
       try {
+        store.dispatch(ClearEmployeeListAction());
         List<User> employeeList = await _fetchEmployeeList(next);
         print('EmployeeManagementMiddleware.call $action employee list size - ${employeeList.length}');
         store.dispatch(SetEmployeeListAction(employeeList: employeeList));

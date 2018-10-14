@@ -14,6 +14,8 @@ const colorSubHeading = Colors.deepPurple;
 
 const colorCaptionText = Colors.white70;
 
+const colorLoadingProgressText = Colors.blueGrey;
+
 const colorTitleText = Colors.white70;
 const colorSubtitleText = Colors.white70;
 

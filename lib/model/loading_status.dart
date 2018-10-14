@@ -4,5 +4,4 @@ enum LoadingStatus {
   error,
   success,
   failure,
-  reveal
 }

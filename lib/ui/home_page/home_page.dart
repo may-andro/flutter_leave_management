@@ -199,10 +199,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     IconButton(
                       icon: Icon(
-                        Icons.settings,
+                        Icons.refresh,
                         color: Colors.white,
                       ),
                       onPressed: () {
+                        refreshPage(viewModel);
                       },
                     ),
                   ],
@@ -288,6 +289,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       default: return Center();
     }
   }
+
+  void refreshPage(HomeViewModel viewModel) {
+    switch(selectedMenuItemId) {
+      case 0: return refreshDashboard(viewModel.user.mmid);
+      case 1: return refreshPublicHoliday();
+      case 2: return refreshUserManagement();
+      case 3: return refreshProjectManagement();
+      case 4: return null;
+      default: return null;
+    }
+  }
+
+  void refreshDashboard(String mmid) {
+    var store = StoreProvider.of<AppState>(context);
+    store.dispatch(ClearAppliedLeaveAction());
+    store.dispatch(FetchAppliedLeaveAction(mmid: mmid));
+  }
+
+  void refreshPublicHoliday() {
+    var store = StoreProvider.of<AppState>(context);
+    store.dispatch(FetchPublicHolidayAction());
+  }
+
+  void refreshUserManagement() {
+    var store = StoreProvider.of<AppState>(context);
+    store.dispatch(FetchEmployeeListAction());
+  }
+
+  void refreshProjectManagement() {
+    var store = StoreProvider.of<AppState>(context);
+    store.dispatch(FetchProjectListAction());
+  }
+
+
+
+
 }
 
 class HomeViewModel {

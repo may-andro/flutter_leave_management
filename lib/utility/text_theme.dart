@@ -41,4 +41,11 @@ class TextStyles {
       fontWeight: FontWeight.w400,
       fontSize: 14.0
   );
+
+  static const TextStyle loadingProgressStyle = const TextStyle(
+      color: colorLoadingProgressText,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w400,
+      fontSize: 14.0
+  );
 }

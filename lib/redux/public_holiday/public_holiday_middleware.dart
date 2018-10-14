@@ -11,6 +11,7 @@ class PublicHolidayMiddleware extends MiddlewareClass<AppState> {
   Future<Null> call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is FetchPublicHolidayAction) {
       try {
+        store.dispatch(ClearPublicHolidayAction());
         List<PublicHoliday> publicHolidayList = await _fetchPublicHoliday(next);
         store.dispatch(SetPublicHolidayAction(publicHolidayList: publicHolidayList));
       } catch (e) {

@@ -13,6 +13,7 @@ class ProjectManagementMiddleware extends MiddlewareClass<AppState> {
     next(action);
     if (action is FetchProjectListAction) {
       try {
+        store.dispatch(ClearProjectListAction());
         List<Project> projectList = await _fetchProjectList(next);
         print('ProjectManagementMiddleware.call $action list size ${projectList.length}');
         next(SetProjectListAction(projectList: projectList));
@@ -30,7 +31,6 @@ class ProjectManagementMiddleware extends MiddlewareClass<AppState> {
       }
     }
   }
-
 
   Future<List<Project>> _fetchProjectList(NextDispatcher next) async{
     List<Project> projectList = [];

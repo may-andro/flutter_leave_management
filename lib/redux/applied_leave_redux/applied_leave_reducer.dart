@@ -11,6 +11,7 @@ final appliedLeaveReducer = combineReducers<AppliedLeaveState>([
   TypedReducer<AppliedLeaveState, SetAppliedLeaveAction>(_setAppliedLeaveListState),
   TypedReducer<AppliedLeaveState, AddLeaveAction>(_addLeaveState),
   TypedReducer<AppliedLeaveState, DeleteLeaveAction>(_deleteLeaveState),
+  TypedReducer<AppliedLeaveState, UpdateLeaveAction>(_updateLeaveState),
 ]);
 
 AppliedLeaveState _fetchingAppliedLeaveList(AppliedLeaveState state, FetchAppliedLeaveAction action) {
@@ -35,4 +36,9 @@ AppliedLeaveState _deleteLeaveState(AppliedLeaveState state, DeleteLeaveAction a
 
 AppliedLeaveState _addLeaveState(AppliedLeaveState state, AddLeaveAction action) {
   return state.addLeave(leave: action.leave);
+}
+
+AppliedLeaveState _updateLeaveState(AppliedLeaveState state, UpdateLeaveAction action) {
+  print('_updateLeaveState ${action.leave}');
+  return state.updateLeave(leave: action.leave, index: action.index);
 }
