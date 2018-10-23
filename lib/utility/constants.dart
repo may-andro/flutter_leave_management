@@ -1,3 +1,4 @@
+import 'package:flutter_mm_hrmangement/ui/home_page/model/menu_item_model.dart';
 import 'package:intl/intl.dart';
 
 const List<String> DEPARTMENT_LIST= [
@@ -109,3 +110,25 @@ String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate,
     default: return vocationalMessage;
   }
 }
+
+var menuList = [
+  MenuItem(
+    id: 0,
+    title: 'Dashboard',
+  ),
+  MenuItem(
+    id: 1,
+    title: 'Company Leave',
+  ),
+  MenuItem(
+  id: 2,
+  title: 'Team',
+  ),
+  MenuItem(
+  id: 3,
+  title: 'Project',
+  ),
+  MenuItem(
+  id: 4,
+  title: 'Logout',
+  )];

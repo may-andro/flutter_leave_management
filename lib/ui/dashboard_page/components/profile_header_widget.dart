@@ -19,7 +19,7 @@ class ProfileHeaderWidget extends StatelessWidget {
       builder: (BuildContext context, ViewModel viewModel) {
         return Container(
             constraints: BoxConstraints.expand(),
-            color: Colors.white,
+            color: Colors.transparent,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

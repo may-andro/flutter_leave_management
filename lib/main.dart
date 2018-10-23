@@ -46,10 +46,13 @@ Future<void> _setStore(User user, Store<AppState> store) async {
   store.dispatch(LoginUserAction(user));
   store.dispatch(FetchAppliedLeaveAction(mmid: user.mmid));
   store.dispatch(FetchPublicHolidayAction());
-  if(user.role.id == 0 || user.role.id == 1 || user.role.id == 5 || user.role.id == 6){
+  if (user.role.id == 0 ||
+      user.role.id == 1 ||
+      user.role.id == 5 ||
+      user.role.id == 6) {
     store.dispatch(FetchEmployeeListAction());
   }
-  if(user.role.id == 0 || user.role.id == 5 || user.role.id == 6){
+  if (user.role.id == 0 || user.role.id == 5 || user.role.id == 6) {
     store.dispatch(FetchProjectListAction());
   }
 }
@@ -98,26 +101,32 @@ class Splash extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            body: Container(
-              color: Colors.white,
-              child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(child: new FlutterLogo(colors: Colors.pink, size: 80.0)),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Center(
-                  child: new Text("Leave Management",
-                      style: new TextStyle(fontSize: 32.0))),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(0.0),
-            child: Center(
-                  child:
-                      new Text("for Mutual Mobile", style: new TextStyle(fontSize: 16.0))),
-          ),
-        ], mainAxisAlignment: MainAxisAlignment.center),
+          backgroundColor: Colors.white,
+            body: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                Container(
+          color: Colors.transparent,
+          child: Column(children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                    child: new FlutterLogo(colors: Colors.pink, size: 80.0)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                    child: new Text("Leave Management",
+                        style: new TextStyle(fontSize: 32.0))),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: Center(
+                    child: new Text("for Mutual Mobile",
+                        style: new TextStyle(fontSize: 16.0))),
+              ),
+          ], mainAxisAlignment: MainAxisAlignment.center),
+        ),]
             )),
         theme: new ThemeData(
           primarySwatch: Colors.deepPurple,
@@ -128,6 +137,7 @@ class Splash extends StatelessWidget {
 
 class FetchingData extends StatelessWidget {
   final User user;
+
   FetchingData(this.user);
 
   @override
@@ -136,28 +146,27 @@ class FetchingData extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
             body: Container(
-              color: Colors.white,
-              child: Column(children: [
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Center(
-                      child: new Text("Fetching data",
-                          style: new TextStyle(fontSize: 32.0))),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: Center(
-                      child:
-                      new Text("for ${user.name}", style: new TextStyle(fontSize: 16.0))),
-                ),
-                Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    )
-                )
-              ], mainAxisAlignment: MainAxisAlignment.center),
-            )),
+          color: Colors.white,
+          child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                  child: new Text("Fetching data",
+                      style: new TextStyle(fontSize: 32.0))),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: Center(
+                  child: new Text("for ${user.name}",
+                      style: new TextStyle(fontSize: 16.0))),
+            ),
+            Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ))
+          ], mainAxisAlignment: MainAxisAlignment.center),
+        )),
         theme: new ThemeData(
           primarySwatch: Colors.deepPurple,
           canvasColor: Colors.transparent,
@@ -167,7 +176,9 @@ class FetchingData extends StatelessWidget {
 
 class RouteOnBoardingPage extends StatelessWidget {
   final Store<AppState> store;
+
   RouteOnBoardingPage(this.store);
+
   @override
   Widget build(BuildContext context) {
     return StoreProvider(
@@ -176,15 +187,16 @@ class RouteOnBoardingPage extends StatelessWidget {
           title: 'MM Leave Management',
           debugShowCheckedModeBanner: false,
           theme: appTheme,
-          home: OnBoardingPage()
-      ),
+          home: OnBoardingPage()),
     );
   }
 }
 
 class RouteHomePage extends StatelessWidget {
   final Store<AppState> store;
+
   RouteHomePage(this.store);
+
   @override
   Widget build(BuildContext context) {
     return StoreProvider(
@@ -193,15 +205,16 @@ class RouteHomePage extends StatelessWidget {
           title: 'MM Leave Management',
           debugShowCheckedModeBanner: false,
           theme: appTheme,
-          home: HomePage()
-      ),
+          home: HomePage()),
     );
   }
 }
 
 class RouteSignInPage extends StatelessWidget {
   final Store<AppState> store;
+
   RouteSignInPage(this.store);
+
   @override
   Widget build(BuildContext context) {
     return StoreProvider(
@@ -210,31 +223,10 @@ class RouteSignInPage extends StatelessWidget {
           title: 'MM Leave Management',
           debugShowCheckedModeBanner: false,
           theme: appTheme,
-          home: SignInPage()
-      ),
+          home: SignInPage()),
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class MyApp extends StatelessWidget {
   final AuthUser authUser;
@@ -258,20 +250,26 @@ class MyApp extends StatelessWidget {
             builder: (BuildContext context, snapshot) {
               if (!authUser.isOnboarded) {
                 return OnBoardingPage();
-              }else if (authUser.isLoggedIn) {
+              } else if (authUser.isLoggedIn) {
                 return FutureBuilder(
                   future: _fetchLeaveData(authUser.user.mmid),
-                  builder: (BuildContext context, AsyncSnapshot<List<Leave>> snapShot) {
-                    if(snapShot.hasData) {
-                      print('_AppState.build going to home ${authUser.user.name}');
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<Leave>> snapShot) {
+                    if (snapShot.hasData) {
+                      print(
+                          '_AppState.build going to home ${authUser.user.name}');
                       store.dispatch(LoginUserAction(authUser.user));
-                      store.dispatch(FetchAppliedLeaveAction(mmid: authUser.user.mmid));
+                      store.dispatch(
+                          FetchAppliedLeaveAction(mmid: authUser.user.mmid));
                       store.dispatch(FetchPublicHolidayAction());
-                      if(authUser.user.role.id == 0 || authUser.user.role.id == 1 || authUser.user.role.id == 5 || authUser.user.role.id == 6){
+                      if (authUser.user.role.id == 0 ||
+                          authUser.user.role.id == 1 ||
+                          authUser.user.role.id == 5 ||
+                          authUser.user.role.id == 6) {
                         store.dispatch(FetchEmployeeListAction());
                       }
                       return HomePage();
-                    } else{
+                    } else {
                       return FetchingData(authUser.user);
                     }
                   },
@@ -280,12 +278,11 @@ class MyApp extends StatelessWidget {
                 return SignInPage();
               }
             },
-          )
-      ),
+          )),
     );
   }
 
-  Future<List<Leave>> _fetchLeaveData(String mmid) async{
+  Future<List<Leave>> _fetchLeaveData(String mmid) async {
     List<Leave> leaveList = [];
     await Firestore.instance.runTransaction((Transaction transaction) async {
       var snapshot = await Firestore.instance
@@ -297,7 +294,6 @@ class MyApp extends StatelessWidget {
         Leave leave = Leave.fromJson(snapshot);
         leaveList.add(leave);
       });
-
     });
     return leaveList;
   }

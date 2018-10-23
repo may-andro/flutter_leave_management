@@ -30,3 +30,15 @@ flutter:
     - assets/home.jpeg
     - assets/tick.png
     - assets/mutualmobile.png
+    - assets/reindeer.png
+
+    - assets/images/owl.png
+    - assets/images/book1.gif
+    - assets/images/book2.gif
+    - assets/images/book3.gif
+    - assets/images/book4.gif
+
+    - assets/images/frappe.png
+    - assets/images/glass.png
+    - assets/images/frappe_with_straw.png
+    - assets/images/glass_with_straw.png
