@@ -38,6 +38,11 @@ const LOGGED_IN_USER_MMID = 'LOGGED_IN_USER_MMID';
 
 const ONBOARDING_FINISHED = 'ONBOARDING_FINISHED';
 
+const SELECTED_THEME = 'SELECTED_THEME';
+const SELECTED_THEME_PURPLE = 0;
+const SELECTED_THEME_BLUE = 1;
+const SELECTED_THEME_RED = 2;
+const SELECTED_THEME_YELLOW = 3;
 
 String getLeaveMessage(int dayCount, DateTime _fromDate, DateTime _toDate,
     String reason, String typeOfLeave, String name) {

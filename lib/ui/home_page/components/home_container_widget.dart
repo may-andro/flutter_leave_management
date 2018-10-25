@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
 import 'package:flutter_mm_hrmangement/model/RoleModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
+import 'package:flutter_mm_hrmangement/redux/app_action/app_action.dart';
 import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_action.dart';
 import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_action.dart';
 import 'package:flutter_mm_hrmangement/redux/login_action/actions.dart';
@@ -14,6 +15,8 @@ import 'package:flutter_mm_hrmangement/ui/home_page/components/base_fragment_con
 import 'package:flutter_mm_hrmangement/ui/home_page/components/extended_fab_widget.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/components/menu_controller.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/components/menu_screen.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/components/setting_controller.dart';
+import 'package:flutter_mm_hrmangement/ui/home_page/components/setting_page.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/model/menu_item_model.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/model/menu_model.dart';
 import 'package:flutter_mm_hrmangement/ui/leave_request_page/user_leave_request_page.dart';
@@ -23,6 +26,7 @@ import 'package:flutter_mm_hrmangement/ui/public_holiday_management/public_holid
 import 'package:flutter_mm_hrmangement/ui/user_management_page/user_list_page.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
+import 'package:flutter_mm_hrmangement/utility/text_theme.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,11 +41,17 @@ class _HomeContainerWidgetState extends State<HomeContainerWidget>
   var selectedMenuItemId = 0;
 
   MenuController menuController;
+  SettingController settingController;
+
+  var settingMenuState = 0;
 
   Curve scaleDownCurve = new Interval(0.0, 0.5, curve: Curves.easeOut);
   Curve scaleUpCurve = new Interval(0.0, 1.0, curve: Curves.easeOut);
   Curve slideOutCurve = new Interval(0.0, 1.0, curve: Curves.easeOut);
   Curve slideInCurve = new Interval(0.0, 1.0, curve: Curves.easeOut);
+
+  Curve slideOut = new Interval(0.0, 1.0, curve: Curves.easeOut);
+  Curve slideIn = new Interval(0.0, 1.0, curve: Curves.easeOut);
 
   @override
   void initState() {
@@ -53,11 +63,18 @@ class _HomeContainerWidgetState extends State<HomeContainerWidget>
           print('_HomeContainerWidgetState.initState');
         }));
 
+    settingController = new SettingController(
+      vsync: this,
+    )..addListener(() => setState(() {
+      print('_HomeContainerWidgetState.initState');
+    }));
+
   }
 
   @override
   void dispose() {
     menuController.dispose();
+    settingController.dispose();
     super.dispose();
   }
 
@@ -82,19 +99,48 @@ class _HomeContainerWidgetState extends State<HomeContainerWidget>
                   }
                 },
               ),
+
               zoomAndSlideContent(
                 BaseFragmentContainerWidget(
                   isDrawerOpen: menuController.state == MenuState.open,
+                  isSettingOpen: settingController.state == MenuState.open,
                   contentScreen: _buildUI(selectedMenuItemId, context),
-                  fabButton: getFabAccordingToMenuSelection(
-                      selectedMenuItemId, viewModel.user.role.id),
+                  fabButton: getFabAccordingToMenuSelection(selectedMenuItemId, viewModel.user.role.id),
                   menuToggleCallback: () {
                     menuController.toggle();
                   },
                   refreshCallback: () {
+                    settingController.toggle();
+                    /*setState(() {
+                      settingMenuState = 1;
+                    });*/
                     //refreshPage(viewModel);
                   },
                 ),
+              ),
+
+              slideUpAndDownContent(
+                  SettingPage(
+                    menu: getSettingMenu(),
+                    menuClickCallback: (index) {
+                      switch(index) {
+                        case 0:
+
+                          break;
+                        case 1:
+                          var store = StoreProvider.of<AppState>(context);
+                          store.dispatch(ChangeThemeAction(themeId: SELECTED_THEME_RED));
+                          settingController.toggle();
+                          break;
+                        case 2: refreshPage(viewModel);
+                          break;
+                        default: break;
+                      }
+                    },
+                    closeMenuCallback: () {
+                      settingController.toggle();
+                    },
+                  )
               ),
             ],
           );
@@ -148,6 +194,39 @@ class _HomeContainerWidgetState extends State<HomeContainerWidget>
     );
   }
 
+  slideUpAndDownContent(Widget content) {
+    var slidePercent;
+    switch (settingController.state) {
+      case SettingState.closed:
+        slidePercent = 1.0;
+        print('slidePercent close= $slidePercent');
+        break;
+      case SettingState.open:
+        slidePercent = 0.0;
+        print('slidePercent open= $slidePercent');
+        break;
+      case SettingState.opening:
+        slidePercent = 1.0 - slideIn.transform(settingController.percentOpen);
+        print('slidePercent opening= $slidePercent');
+        break;
+      case SettingState.closing:
+        slidePercent = 1.0 - slideOut.transform(settingController.percentOpen);
+        print('slidePercent closing = $slidePercent');
+        break;
+    }
+
+    final slideAmount = 1075.0 * slidePercent;
+
+    return new Transform(
+      transform: new Matrix4.translationValues(0.0, slideAmount, 0.0),
+      alignment: Alignment.center,
+      child: Padding(
+        padding: EdgeInsets.all(0.0),
+          child: content),
+    );
+  }
+
+
   Menu getMenu(Role role) {
     var list = [
       MenuItem(
@@ -175,6 +254,26 @@ class _HomeContainerWidgetState extends State<HomeContainerWidget>
       id: 4,
       title: 'Logout',
     ));
+    return Menu(
+      items: list,
+    );
+  }
+
+  Menu getSettingMenu() {
+    var list = [
+      MenuItem(
+        id: 0,
+        title: 'Language',
+      ),
+      MenuItem(
+        id: 1,
+        title: 'Theme',
+      ),
+      MenuItem(
+        id: 2,
+        title: 'Refresh',
+      ),
+    ];
     return Menu(
       items: list,
     );

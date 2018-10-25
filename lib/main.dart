@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_action.dart';
 import 'package:flutter_mm_hrmangement/redux/employee_management_redux/employee_management_action.dart';
@@ -14,18 +13,17 @@ import 'package:flutter_mm_hrmangement/redux/store.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/home_page.dart';
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/onboarding_page.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/signin_page.dart';
-import 'package:flutter_mm_hrmangement/utility/colors.dart';
+import 'package:flutter_mm_hrmangement/ui/splash_page/splash_page.dart';
 import 'package:flutter_mm_hrmangement/utility/constants.dart';
 import 'package:flutter_mm_hrmangement/utility/navigation.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-//void main() => run();
 void main() => run();
 
 Future run() async {
-  runApp(new Splash());
+  runApp(SplashPage());
 
   var authUser = await _init();
   var store = await createStore();
@@ -95,46 +93,6 @@ Future<AuthUser> _init() async {
   }
 }
 
-class Splash extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          backgroundColor: Colors.white,
-            body: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                Container(
-          color: Colors.transparent,
-          child: Column(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                    child: new FlutterLogo(colors: Colors.pink, size: 80.0)),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Center(
-                    child: new Text("Leave Management",
-                        style: new TextStyle(fontSize: 32.0))),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: Center(
-                    child: new Text("for Mutual Mobile",
-                        style: new TextStyle(fontSize: 16.0))),
-              ),
-          ], mainAxisAlignment: MainAxisAlignment.center),
-        ),]
-            )),
-        theme: new ThemeData(
-          primarySwatch: Colors.deepPurple,
-          canvasColor: Colors.transparent,
-        ));
-  }
-}
-
 class FetchingData extends StatelessWidget {
   final User user;
 
@@ -183,11 +141,17 @@ class RouteOnBoardingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return StoreProvider(
       store: store,
-      child: new MaterialApp(
-          title: 'MM Leave Management',
-          debugShowCheckedModeBanner: false,
-          theme: appTheme,
-          home: OnBoardingPage()),
+      child: StoreConnector<AppState, AppState>(
+        converter: (store) => store.state,
+        builder: (context, appState) {
+          return MaterialApp(
+              title: 'MM Leave Management',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeProvider(store.state.themeDataId)._getAppTheme(),
+              home: OnBoardingPage()
+          );
+        },
+      )
     );
   }
 }
@@ -201,11 +165,17 @@ class RouteHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return StoreProvider(
       store: store,
-      child: new MaterialApp(
-          title: 'MM Leave Management',
-          debugShowCheckedModeBanner: false,
-          theme: appTheme,
-          home: HomePage()),
+      child: StoreConnector<AppState, AppState>(
+        converter: (store) => store.state,
+        builder: (context, appState) {
+          return MaterialApp(
+              title: 'MM Leave Management',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeProvider(store.state.themeDataId)._getAppTheme(),
+              home: HomePage()
+          );
+        },
+      )
     );
   }
 }
@@ -219,16 +189,137 @@ class RouteSignInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return StoreProvider(
       store: store,
-      child: new MaterialApp(
-          title: 'MM Leave Management',
-          debugShowCheckedModeBanner: false,
-          theme: appTheme,
-          home: SignInPage()),
+      child: StoreConnector<AppState, AppState>(
+        converter: (store) => store.state,
+        builder: (context, appState) {
+          return MaterialApp(
+              title: 'MM Leave Management',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeProvider(store.state.themeDataId)._getAppTheme(),
+              home: SignInPage()
+          );
+        },
+      )
     );
   }
 }
 
-class MyApp extends StatelessWidget {
+class ThemeProvider{
+  final int themeId;
+
+  ThemeProvider(this.themeId);
+
+  ThemeData _getAppTheme() {
+    final ThemeData base = ThemeData.light();
+
+    ThemeData appTheme;
+    switch(themeId) {
+      case SELECTED_THEME_PURPLE: appTheme =  base.copyWith(
+        accentColor: Colors.blueGrey,
+        primaryColor: Colors.deepPurple,
+        bottomAppBarColor: Colors.deepPurple,
+        primaryColorLight: Colors.purpleAccent,
+        primaryColorDark: Colors.purple,
+        buttonColor: Colors.black,
+        scaffoldBackgroundColor: Colors.white,
+        backgroundColor: Colors.white70,
+        cardColor: Colors.blueGrey,
+        textSelectionColor: Colors.deepPurple,
+        errorColor: Colors.redAccent,
+        cursorColor: Colors.blueGrey,
+        canvasColor: Colors.white,
+        dialogBackgroundColor: Colors.white,
+        indicatorColor: Colors.blueGrey,
+        hintColor: Colors.blueGrey,
+      );
+      break;
+
+      case SELECTED_THEME_BLUE: appTheme = base.copyWith(
+        accentColor: Colors.blueGrey,
+        primaryColor: Colors.blue,
+        bottomAppBarColor: Colors.blue,
+        primaryColorLight: Colors.blueAccent,
+        primaryColorDark: Colors.blue,
+        buttonColor: Colors.pink,
+        scaffoldBackgroundColor: Colors.white,
+        backgroundColor: Colors.white70,
+        cardColor: Colors.blueGrey,
+        textSelectionColor: Colors.blueGrey,
+        errorColor: Colors.redAccent,
+        cursorColor: Colors.black,
+        canvasColor: Colors.white,
+        dialogBackgroundColor: Colors.white,
+        indicatorColor: Colors.black,
+        hintColor: Colors.blueGrey,
+      );
+      break;
+
+      case SELECTED_THEME_RED: appTheme = base.copyWith(
+        accentColor: Colors.black87,
+        primaryColor: Colors.red,
+        bottomAppBarColor: Colors.red,
+        primaryColorLight: Colors.redAccent,
+        primaryColorDark: Colors.red,
+        buttonColor: Colors.black,
+        scaffoldBackgroundColor: Colors.white,
+        backgroundColor: Colors.white70,
+        cardColor: Colors.blueGrey,
+        textSelectionColor: Colors.deepPurple,
+        errorColor: Colors.deepOrange,
+        cursorColor: Colors.black,
+        canvasColor: Colors.white,
+        dialogBackgroundColor: Colors.white,
+        indicatorColor: Colors.black,
+        hintColor: Colors.blueGrey,
+      );
+      break;
+
+      case SELECTED_THEME_YELLOW: appTheme = base.copyWith(
+        accentColor: Colors.black,
+        primaryColor: Colors.amber,
+        bottomAppBarColor: Colors.amber,
+        primaryColorLight: Colors.amberAccent,
+        primaryColorDark: Colors.amber,
+        buttonColor: Colors.black,
+        scaffoldBackgroundColor: Colors.white,
+        backgroundColor: Colors.white70,
+        cardColor: Colors.blueGrey,
+        textSelectionColor: Colors.blueGrey,
+        errorColor: Colors.red,
+        cursorColor: Colors.black,
+        canvasColor: Colors.white,
+        dialogBackgroundColor: Colors.white,
+        indicatorColor: Colors.black,
+        hintColor: Colors.blueGrey,
+      );
+      break;
+
+      default: appTheme = base.copyWith(
+        accentColor: Colors.blueGrey,
+        primaryColor: Colors.deepPurple,
+        bottomAppBarColor: Colors.deepPurple,
+        primaryColorLight: Colors.purpleAccent,
+        primaryColorDark: Colors.purple,
+        buttonColor: Colors.black,
+        scaffoldBackgroundColor: Colors.white,
+        backgroundColor: Colors.white70,
+        cardColor: Colors.blueGrey,
+        textSelectionColor: Colors.deepPurple,
+        errorColor: Colors.redAccent,
+        cursorColor: Colors.blueGrey,
+        canvasColor: Colors.white,
+        dialogBackgroundColor: Colors.white,
+        indicatorColor: Colors.blueGrey,
+        hintColor: Colors.blueGrey,
+      );
+      break;
+    }
+
+    return appTheme;
+  }
+}
+
+/*class MyApp extends StatelessWidget {
   final AuthUser authUser;
   final Store<AppState> store;
 
@@ -297,7 +388,7 @@ class MyApp extends StatelessWidget {
     });
     return leaveList;
   }
-}
+}*/
 
 class AuthUser {
   bool isOnboarded = false;

@@ -1,12 +1,13 @@
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mm_hrmangement/components/background_widget.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/model/menu_item_model.dart';
 import 'package:flutter_mm_hrmangement/ui/home_page/model/menu_model.dart';
 
 class BaseFragmentContainerWidget extends StatefulWidget {
   final bool isDrawerOpen;
+  final bool isSettingOpen;
   final Widget contentScreen;
   final Widget fabButton;
   final Function() refreshCallback;
@@ -14,6 +15,7 @@ class BaseFragmentContainerWidget extends StatefulWidget {
 
   BaseFragmentContainerWidget({
     this.isDrawerOpen,
+    this.isSettingOpen,
     this.contentScreen,
     this.fabButton,
     this.refreshCallback,
@@ -79,7 +81,23 @@ class _BaseFragmentContainerWidgetState
               },
             ),
 
-            CustomPaint(
+            IconButton(
+              icon: widget.isSettingOpen
+                  ? Icon(
+                Icons.clear,
+                color: Colors.white,
+              )
+                  : Icon(
+                Icons.settings,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                widget.refreshCallback();
+              },
+            ),
+
+
+            /*CustomPaint(
               painter: RevealProgressButtonPainter(
                   _fraction, MediaQuery.of(context).size),
               child: IconButton(
@@ -88,6 +106,7 @@ class _BaseFragmentContainerWidgetState
                   color: Colors.white,
                 ),
                 onPressed: () {
+                  widget.refreshCallback();
                   if (state == 0) {
                     reveal();
                   } else {
@@ -96,6 +115,9 @@ class _BaseFragmentContainerWidgetState
                 },
               ),
             ),
+*/
+
+
           ],
         ),
       ),
@@ -116,6 +138,8 @@ class _BaseFragmentContainerWidgetState
           setState(() {
             this.state = 1;
           });
+
+          widget.refreshCallback();
         }
 
         if (state == AnimationStatus.dismissed) {
@@ -148,7 +172,6 @@ class _BaseFragmentContainerWidgetState
     if (state == 0) {
       return Container();
     } else {
-
       return ListView(
         children: <Widget>[
           ListTile(
@@ -170,23 +193,10 @@ class _BaseFragmentContainerWidgetState
 }
 
 class RevealProgressButtonPainter extends CustomPainter {
-
-  RevealProgressButtonPainter(this._fraction, this._screenSize): textPainter = TextPainter(
-    textAlign: TextAlign.center,
-    textDirection: TextDirection.rtl,
-  ),
-        textStyle= const TextStyle(
-          color: Colors.white,
-          fontFamily: 'Times New Roman',
-          fontSize: 25.0,
-        );
-
   Size _screenSize;
-
   double _fraction;
 
-  final TextPainter textPainter;
-  final TextStyle textStyle;
+  RevealProgressButtonPainter(this._fraction, this._screenSize);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -194,26 +204,82 @@ class RevealProgressButtonPainter extends CustomPainter {
       ..color = Colors.deepPurple
       ..style = PaintingStyle.fill;
 
-    var finalRadius = sqrt(pow(_screenSize.width / 2, 2) +
-        pow(_screenSize.height - 32.0 - 48.0, 2));
-
+    var finalRadius =
+        sqrt(pow(_screenSize.width, 2) + pow(_screenSize.height, 2));
     var radius = 24.0 + finalRadius * _fraction;
 
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), radius, paint);
+    canvas.drawCircle(Offset(size.width, size.height), radius, paint);
+
+    if (_fraction > 0.9) {
+      TextSpan textSpanMenu = new TextSpan(
+          style: new TextStyle(color: Colors.white, fontSize: 34.0),
+          text: 'Menu');
+      TextPainter textPainterMenu = new TextPainter(
+          text: textSpanMenu,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr);
+      textPainterMenu.layout();
+      textPainterMenu.paint(
+          canvas, Offset(-_screenSize.width / 2, -_screenSize.height / 2 - 75));
+
+      TextSpan textSpanTheme = TextSpan(
+          style: TextStyle(color: Colors.white, fontSize: 24.0),
+          text: 'Theme',
+          children: [
+            TextSpan(
+                style: new TextStyle(color: Colors.white, fontSize: 24.0),
+                text: 'Change',
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    print(' iiii pressed');
+                  }),
+          ],
+          );
+      TextPainter textPainterTheme = new TextPainter(
+          text: textSpanTheme,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr);
+      textPainterTheme.layout();
+      textPainterTheme.paint(
+          canvas, Offset(-_screenSize.width / 2, -_screenSize.height / 2));
+
+      TextSpan textSpanLanguage = new TextSpan(
+          style: new TextStyle(color: Colors.white, fontSize: 24.0),
+          text: 'Language',
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              print(' iiii pressed');
+            });
+      TextPainter textPainterLanguage = new TextPainter(
+          text: textSpanLanguage,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr);
+      textPainterLanguage.layout();
+      textPainterLanguage.paint(
+          canvas, Offset(-_screenSize.width / 2, -_screenSize.height / 2 + 75));
+
+      TextSpan textSpanSetting = new TextSpan(
+          style: TextStyle(color: Colors.white,
+              fontSize: 24.0,
+              letterSpacing: 1.2),
+          text: 'Setting',
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              print(' iiii pressed');
+            });
+      TextPainter textPainterSetting = new TextPainter(
+          text: textSpanSetting,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr);
+      textPainterSetting.layout();
+      textPainterSetting.paint(canvas,
+          Offset(-_screenSize.width / 2, -_screenSize.height / 2 + 150)
+      );
 
 
-    /*canvas.save();
 
-    textPainter.text= new TextSpan(
-      text: 'Setting',
-      style: textStyle,
-    );
-    textPainter.layout();
 
-    textPainter.paint(canvas, new Offset(-(textPainter.width/2), -(textPainter.height/2)));
-
-    canvas.restore();*/
-
+    }
   }
 
   @override
