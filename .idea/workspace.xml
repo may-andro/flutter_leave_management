@@ -7,37 +7,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a13c69d0-0fa0-4981-99f0-7422f6b93cb2" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/assets/images/book1.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/book2.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/book3.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/book4.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/folded_card.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/frappe.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/frappe_with_straw.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/glass.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/images/glass_with_straw.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/page1.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/page2.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/page3.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/reindeer.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/assets/tick.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/lib/components/date_time_picker_widget.dart" afterPath="$PROJECT_DIR$/lib/components/date_time_picker_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/redux/applied_leave_redux/applied_leave_middleware.dart" afterPath="$PROJECT_DIR$/lib/redux/applied_leave_redux/applied_leave_middleware.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/dashboard_page/components/applies_leave_list.dart" afterPath="$PROJECT_DIR$/lib/ui/dashboard_page/components/applies_leave_list.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/home_page/components/home_container_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/home_page/components/home_container_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/home_page/components/menu_list_item_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/home_page/components/menu_list_item_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/leave_request_page/components/applied_leave_from_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/leave_request_page/components/applied_leave_from_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/leave_request_page/user_leave_request_page.dart" afterPath="$PROJECT_DIR$/lib/ui/leave_request_page/user_leave_request_page.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/onboarding_page/components/dot_indicator_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/onboarding_page/components/dot_indicator_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/onboarding_page/components/onboarding_item_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/onboarding_page/components/onboarding_item_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/onboarding_page/model/IntroModel.dart" afterPath="$PROJECT_DIR$/lib/ui/onboarding_page/model/OnboardingModel.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/onboarding_page/onboarding_page.dart" afterPath="$PROJECT_DIR$/lib/ui/onboarding_page/onboarding_page.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/public_holiday_management/components/add_public_holiday_form_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/public_holiday_management/components/add_public_holiday_form_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/signin_page/components/app_logo.dart" afterPath="$PROJECT_DIR$/lib/ui/signin_page/components/app_logo.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/signin_page/components/login_form.dart" afterPath="$PROJECT_DIR$/lib/ui/signin_page/components/login_form.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/signin_page/signin_page.dart" afterPath="$PROJECT_DIR$/lib/ui/signin_page/signin_page.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/splash_page/splash_page.dart" afterPath="$PROJECT_DIR$/lib/ui/splash_page/splash_page.dart" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" afterPath="$PROJECT_DIR$/pubspec.yaml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -577,7 +546,14 @@
       <option name="project" value="LOCAL" />
       <updated>1540457301938</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Added a leave calender logic for the weekends and public holidays">
+      <created>1540498127095</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1540498127095</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TodoView">
@@ -591,7 +567,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Android Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -610,7 +585,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32336956" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.66791046" sideWeight="0.4978701" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34452736" sideWeight="0.49627262" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.34452736" sideWeight="0.49627262" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26108727" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23822464" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -638,7 +613,8 @@
     <MESSAGE value="Added a canvas background" />
     <MESSAGE value="Added the theme change and setting menu" />
     <MESSAGE value="Added the readme description." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added the readme description." />
+    <MESSAGE value="Added a leave calender logic for the weekends and public holidays" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added a leave calender logic for the weekends and public holidays" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -924,6 +900,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="299">
           <caret line="97" column="56" lean-forward="false" selection-start-line="97" selection-start-column="56" selection-end-line="97" selection-end-column="56" />
+          <folding />
         </state>
       </provider>
     </entry>
