@@ -24,21 +24,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/login.jpg
-    - assets/page1.jpg
-    - assets/page2.jpg
-    - assets/page3.jpg
+    - assets/logo.jpg
     - assets/home.jpeg
-    - assets/tick.png
     - assets/mutualmobile.png
-    - assets/reindeer.png
 
     - assets/images/owl.png
-    - assets/images/book1.gif
-    - assets/images/book2.gif
-    - assets/images/book3.gif
-    - assets/images/book4.gif
-
-    - assets/images/frappe.png
-    - assets/images/glass.png
-    - assets/images/frappe_with_straw.png
-    - assets/images/glass_with_straw.png
+    - assets/images/page1.webp
+    - assets/images/page2.webp
+    - assets/images/page3.webp

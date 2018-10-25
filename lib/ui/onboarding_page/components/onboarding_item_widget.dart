@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mm_hrmangement/ui/onboarding_page/model/IntroModel.dart';
+import 'package:flutter_mm_hrmangement/ui/onboarding_page/model/OnboardingModel.dart';
 import 'package:flutter_mm_hrmangement/ui/onboarding_page/utility/page_transformer.dart';
 import 'package:meta/meta.dart';
 
@@ -9,7 +9,7 @@ class OnboardingItemWidget extends StatelessWidget {
     @required this.pageVisibility,
   });
 
-  final IntroItem item;
+  final OnboardingItem item;
   final PageVisibility pageVisibility;
 
   Widget _applyTextEffects({

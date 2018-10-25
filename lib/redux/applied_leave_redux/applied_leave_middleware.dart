@@ -55,6 +55,7 @@ class AppliedLeaveMiddleware extends MiddlewareClass<AppState> {
   }
 
   Future<void> _addLeaveData(Leave leave, String leaveId) async{
+    print('AppliedLeaveMiddleware._addLeaveData ${leave.message}');
     Firestore.instance.runTransaction((Transaction transaction) async {
       CollectionReference reference =
       Firestore.instance.collection('leaveCollection');

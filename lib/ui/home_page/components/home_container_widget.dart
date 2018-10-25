@@ -123,14 +123,13 @@ class _HomeContainerWidgetState extends State<HomeContainerWidget>
                   SettingPage(
                     menu: getSettingMenu(),
                     menuClickCallback: (index) {
+                      settingController.toggle();
                       switch(index) {
                         case 0:
-
                           break;
                         case 1:
                           var store = StoreProvider.of<AppState>(context);
                           store.dispatch(ChangeThemeAction(themeId: SELECTED_THEME_RED));
-                          settingController.toggle();
                           break;
                         case 2: refreshPage(viewModel);
                           break;

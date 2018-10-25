@@ -25,7 +25,7 @@ class MenuListItemWidget extends StatelessWidget {
           child: new Text(
             title,
             style: new TextStyle(
-              color: isSelected ? Colors.red : Colors.white,
+              color: isSelected ? Colors.white : Colors.brown,
               fontSize: 25.0,
               fontFamily: 'bebas-neue',
               letterSpacing: 2.0,

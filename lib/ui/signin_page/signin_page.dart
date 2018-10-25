@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mm_hrmangement/components/background_widget.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/app_logo.dart';
 import 'package:flutter_mm_hrmangement/ui/signin_page/components/login_form.dart';
@@ -17,7 +16,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _controller = new AnimationController(
-        duration: const Duration(microseconds: 500), vsync: this);
+        duration: const Duration(milliseconds: 3000), vsync: this);
 
     _controller.forward();
   }

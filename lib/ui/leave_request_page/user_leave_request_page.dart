@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mm_hrmangement/model/PublicHoliday.dart';
+import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
 import 'package:flutter_mm_hrmangement/ui/leave_request_page/components/applied_leave_from_widget.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
 class LeaveRequestPage extends StatefulWidget {
   @override
@@ -27,11 +31,31 @@ class _LeaveRequestPageState extends State<LeaveRequestPage>
   }
 
   Widget createUi(BuildContext context) {
-    return Stack(fit: StackFit.expand, children: <Widget>[
-      Container(
-          color: Colors.white,
-          child: AppliedLeaveFormWidget()
-      )
-    ]);
+    return StoreConnector(
+        converter: (Store<AppState> store) => AppliedLeaveViewModel.fromStore(store),
+        builder: (BuildContext context, AppliedLeaveViewModel viewModel) {
+          return Stack(fit: StackFit.expand, children: <Widget>[
+            Container(
+                color: Colors.white,
+                child: AppliedLeaveFormWidget(viewModel.publicHolidayList)
+            )
+          ]
+          );
+        }
+    );
   }
 }
+
+
+class AppliedLeaveViewModel {
+  final List<PublicHoliday> publicHolidayList;
+
+  AppliedLeaveViewModel({
+    @required this.publicHolidayList,
+  });
+
+  static AppliedLeaveViewModel fromStore(Store<AppState> store) {
+    return new AppliedLeaveViewModel(publicHolidayList: store.state.publicHolidayState.publicHolidayList);
+  }
+}
+

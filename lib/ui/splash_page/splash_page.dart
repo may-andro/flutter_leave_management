@@ -14,25 +14,28 @@ class SplashPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Center(
-                        child:
-                            new FlutterLogo(colors: Colors.pink, size: 80.0)),
+                        child: Container(
+                            height: 100.0,
+                            width: 100.0,
+                            alignment: Alignment.center,
+                            child: Image.asset('assets/logo.jpg'))),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Center(
-                        child: new Text("Leave Management",
-                            style: new TextStyle(fontSize: 32.0))),
+                        child: Text("Leave Management",
+                            style: TextStyle(fontSize: 32.0))),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(0.0),
                     child: Center(
-                        child: new Text("for Mutual Mobile",
-                            style: new TextStyle(fontSize: 16.0))),
+                        child: Text("for Mutual Mobile",
+                            style: TextStyle(fontSize: 16.0))),
                   ),
                 ], mainAxisAlignment: MainAxisAlignment.center),
               ),
             ])),
-        theme: new ThemeData(
+        theme: ThemeData(
           primarySwatch: Colors.deepPurple,
           canvasColor: Colors.transparent,
         ));

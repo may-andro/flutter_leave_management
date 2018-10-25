@@ -69,7 +69,7 @@ class _LoginFormState extends State<LoginFormWidget>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(24.0),
+      padding: EdgeInsets.only(top: 8.0, bottom: 24.0, left: 24.0, right: 24.0),
       child: Form(
           key: formKey,
           child: new Column(

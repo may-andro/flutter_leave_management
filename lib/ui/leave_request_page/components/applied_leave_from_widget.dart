@@ -8,6 +8,7 @@ import 'package:flutter_mm_hrmangement/components/date_time_picker_widget.dart';
 import 'package:flutter_mm_hrmangement/components/loading_widget.dart';
 import 'package:flutter_mm_hrmangement/model/LeaveModel.dart';
 import 'package:flutter_mm_hrmangement/model/ProjectModel.dart';
+import 'package:flutter_mm_hrmangement/model/PublicHoliday.dart';
 import 'package:flutter_mm_hrmangement/model/UserModel.dart';
 import 'package:flutter_mm_hrmangement/redux/applied_leave_redux/applied_leave_action.dart';
 import 'package:flutter_mm_hrmangement/redux/states/app_state.dart';
@@ -17,6 +18,11 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
 class AppliedLeaveFormWidget extends StatefulWidget {
+
+  final List<PublicHoliday> publicHolidayList;
+
+  AppliedLeaveFormWidget(this.publicHolidayList);
+
   @override
   _AppliedLeaveFormWidgetState createState() => _AppliedLeaveFormWidgetState();
 }
@@ -28,8 +34,10 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
   final AsyncMemoizer _memoizer = AsyncMemoizer();
 
   String _typeOfLeave;
-  DateTime _fromDate = DateTime.now();
-  DateTime _toDate = DateTime.now();
+  DateTime _fromDate ;
+  DateTime _toDate ;
+  DateTime _selectedFromDate ;
+  DateTime _selectedToDate ;
   List<User> senderList;
 
   var leaveId = '';
@@ -64,7 +72,6 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
           .collection("projectCollection")
           .where('team', arrayContains: projectUserMap)
           .getDocuments();
-      print('projectUserMap projectCollection containg user: ${data.documents.length}');
       data.documents.map<Widget>((DocumentSnapshot documentSnapshot) {
         Project project = Project.fromJson(documentSnapshot.data);
         project.team.forEach((projectUser) {
@@ -83,7 +90,6 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
             .document(projectUser.mmid)
             .get()
             .then((snapshot) {
-          print('_AppliedLeaveFormWidgetState._fetchData ${snapshot['token']} ${projectUser.mmid}');
           fcmTokenList.add(snapshot['token']);
         });
       });
@@ -99,6 +105,22 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
     super.initState();
     _dropDownMenuItemsForTypeOfLeavel = getDropDownMenuItemsForLeaveType();
     _typeOfLeave = _dropDownMenuItemsForTypeOfLeavel[0].value;
+
+    _fromDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+    while(isPublicHoliday(_fromDate, widget.publicHolidayList) || isWeekend(_fromDate)) {
+      _fromDate = _fromDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+    }
+
+    _toDate =  _fromDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+    while(isPublicHoliday(_toDate, widget.publicHolidayList) || isWeekend(_toDate)) {
+      _toDate = _toDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+    }
+
+    _selectedToDate  = _toDate;
+    _selectedFromDate = _fromDate;
+
+    if(isSingleDaySelected) _selectedToDate = _selectedFromDate;
   }
 
   @override
@@ -143,14 +165,19 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
                                   : Colors.grey, () {
                             setState(() {
                               isSingleDaySelected = true;
+                              _selectedToDate  = _selectedFromDate;
                             });
                           }, () {
                             setState(() {
                               isSingleDaySelected = false;
+                              _selectedToDate = _selectedFromDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+                              while(isPublicHoliday(_selectedToDate, widget.publicHolidayList) || isWeekend(_selectedToDate)) {
+                                _selectedToDate = _selectedToDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+                              }
                             });
                           }),
 
-                          createDatePickerDependingOnLeaveDays(),
+                          createDatePickerDependingOnLeaveDays(widget.publicHolidayList),
 
                           Padding(
                             padding: const EdgeInsets.all(20.0),
@@ -223,7 +250,7 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
 
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(getLeaveMessage(_toDate.compareTo(_fromDate), _toDate, _fromDate, textEditingController.text, _typeOfLeave, viewModel.user.name)),
+                            child: Text(getLeaveMessage(getNumberHolidayWithoutWeekends(widget.publicHolidayList), _selectedFromDate, _selectedToDate, textEditingController.text, _typeOfLeave, viewModel.user.name)),
                           ),
 
 
@@ -235,12 +262,12 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
                                     Leave leave = Leave(
                                         mmid: viewModel.user.mmid,
                                         typeOfLeave: _typeOfLeave,
-                                        startDate: _fromDate,
-                                        endDate: _toDate,
+                                        startDate: _selectedFromDate,
+                                        endDate: _selectedToDate,
                                         isSingleDayLeave: isSingleDaySelected,
-                                        numberOfDays: _fromDate.compareTo(_toDate),
+                                        numberOfDays: getNumberHolidayWithoutWeekends(widget.publicHolidayList),
                                         status: 0,
-                                        message: getLeaveMessage(_toDate.compareTo(_fromDate), _toDate, _fromDate, textEditingController.text, _typeOfLeave, viewModel.user.name)
+                                        message: getLeaveMessage(getNumberHolidayWithoutWeekends(widget.publicHolidayList), _selectedFromDate, _selectedToDate, textEditingController.text, _typeOfLeave, viewModel.user.name)
                                     );
 
                                     var store = StoreProvider.of<AppState>(context);
@@ -264,6 +291,26 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
     );
   }
 
+  int getNumberHolidayWithoutWeekends(List<PublicHoliday> publicHolidayList) {
+    int totalCount = _selectedToDate.difference(_selectedFromDate).inDays;
+    var count;
+    if(_selectedFromDate.weekday == 6 ||  _selectedFromDate.weekday == 7) {
+      count = 0;
+    } else {
+      count = 1;
+    }
+    var tempDate = _selectedFromDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+
+    for(int i = 0; i < totalCount; i++) {
+      if(tempDate.weekday == 6 ||  tempDate.weekday == 7 || isPublicHoliday(tempDate, publicHolidayList)) {
+        //escape it
+      } else {
+        count = count + 1;
+      }
+      tempDate = tempDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+    }
+    return count;
+  }
 
   List<DropdownMenuItem<String>> getDropDownMenuItemsForLeaveType() {
     List<DropdownMenuItem<String>> items = new List();
@@ -337,45 +384,55 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
     return filterChips;
   }
 
-  Widget createDatePickerDependingOnLeaveDays() {
+  Widget createDatePickerDependingOnLeaveDays(List<PublicHoliday> publicHolidayList) {
     if (isSingleDaySelected) {
-      return createTextFormFieldForDate(_fromDate, "On ", (DateTime date) {
+      return createTextFormFieldForDate(_fromDate, _selectedFromDate, "On ", (DateTime date) {
         setState(() {
-          _fromDate = date;
-          _toDate = date;
+          _selectedFromDate = date;
+          _selectedToDate = date;
         });
-      });
+      }, publicHolidayList);
     } else {
       return Column(
         children: <Widget>[
-          createTextFormFieldForDate(_fromDate, "From ", (DateTime date) {
+          createTextFormFieldForDate(_fromDate,_selectedFromDate, "From ", (DateTime date) {
             setState(() {
-              _fromDate = date;
+              _selectedFromDate = date;
+              _selectedToDate = _selectedFromDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+              while(isPublicHoliday(_selectedToDate, widget.publicHolidayList) || isWeekend(_selectedToDate)) {
+                _selectedToDate = _selectedToDate.add(Duration(days: 1, hours: 00, minutes: 00, seconds: 00, milliseconds: 00, microseconds: 00));
+              }
             });
-          }),
-          createTextFormFieldForDate(_toDate, "To ", (DateTime date) {
+          }, publicHolidayList),
+          createTextFormFieldForDate(_toDate,_selectedToDate, "To ", (DateTime date) {
             setState(() {
-              _toDate = date;
+              _selectedToDate = date;
             });
-          }),
+          }, publicHolidayList),
         ],
       );
     }
   }
 
   Widget createTextFormFieldForDate(
-      DateTime date, String label, Function onSelect) {
+      DateTime firstDate,
+      DateTime selectedDate,
+      String label,
+      Function onSelect,
+      List<PublicHoliday> publicHolidayList) {
     return Padding(
         padding: const EdgeInsets.only(top: 12.0, left: 16.0),
         child: DateTimePicker(
           labelText: label,
-          selectedDate: date,
+          selectedDate: selectedDate,
           selectDate: onSelect,
+          firstDate: firstDate,
+          lastDate: DateTime(DateTime.now().year,  12, 31),
+          selectableDayPredicate: (DateTime val) => val.weekday == 7 || val.weekday == 6 || isPublicHoliday(val, publicHolidayList) ? false : true,
         ));
   }
 
-  void _showDialog(
-      BuildContext context) {
+  void _showDialog(BuildContext context) {
     var alert = AlertDialog(
       title: Text("Generate your message"),
       content: SingleChildScrollView(
@@ -428,6 +485,20 @@ class _AppliedLeaveFormWidgetState extends State<AppliedLeaveFormWidget> {
     );
 
     showDialog(context: context, builder: (context) => alert);
+  }
+
+  bool isPublicHoliday(DateTime val, List<PublicHoliday> publicHolidayList) {
+    bool isSame = false;
+    publicHolidayList.forEach((date) {
+        if(val.isAtSameMomentAs(date.date)){
+          isSame =  true;
+        }
+    });
+    return isSame;
+  }
+
+  bool isWeekend(DateTime val) {
+    return val.weekday == 7 || val.weekday == 6;
   }
 
 }

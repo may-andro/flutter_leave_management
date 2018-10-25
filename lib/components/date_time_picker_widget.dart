@@ -10,18 +10,26 @@ class DateTimePicker extends StatelessWidget {
     this.labelText,
     this.selectedDate,
     this.selectDate,
+    this.firstDate,
+    this.lastDate,
+    this.selectableDayPredicate
   }) : super(key: key);
 
   final String labelText;
   final DateTime selectedDate;
+  final DateTime firstDate;
+  final DateTime lastDate;
   final ValueChanged<DateTime> selectDate;
+  final SelectableDayPredicate selectableDayPredicate;
 
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
-        firstDate: new DateTime(2015, 8),
-        lastDate: new DateTime(2101));
+        firstDate: firstDate,
+        lastDate: lastDate,
+        selectableDayPredicate: selectableDayPredicate
+    );
     if (picked != null && picked != selectedDate) selectDate(picked);
   }
 

@@ -155,12 +155,12 @@ class ListItemWidget extends StatelessWidget {
     switch (leaveType) {
       case 'Vacation and Family':
         return Icon(
-          Icons.hot_tub,
+          Icons.flight_takeoff,
           color: Colors.blueGrey,
         );
       case 'Sick Leave/ Emergency Leave':
         return Icon(
-          Icons.healing,
+          Icons.local_hospital,
           color: Colors.blueGrey,
         );
       case 'Work from home':
