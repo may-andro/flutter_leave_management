@@ -55,6 +55,11 @@ Udemy: https://www.udemy.com/flutter-dart-the-complete-flutter-app-development-c
 
 Youtube: https://www.youtube.com/channel/UCtWyVkPpb8An90SNDTNF0Pg
 
+## For firebase GCM function:
+
+Refer to this link for GCM notifiction and setting up the firebase function.
+
+https://gist.github.com/may-andro/618ba0ad109c62c46d5ad67d34b986a0
 
 
 
