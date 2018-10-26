@@ -5,25 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a13c69d0-0fa0-4981-99f0-7422f6b93cb2" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/lib/components/app_button_widget.dart" afterPath="$PROJECT_DIR$/lib/components/app_button_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/components/background_widget.dart" afterPath="$PROJECT_DIR$/lib/components/background_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/components/list_item_card_widget.dart" afterPath="$PROJECT_DIR$/lib/components/list_item_card_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/components/no_data_found_widget.dart" afterPath="$PROJECT_DIR$/lib/components/no_data_found_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/redux/applied_leave_redux/applied_leave_middleware.dart" afterPath="$PROJECT_DIR$/lib/redux/applied_leave_redux/applied_leave_middleware.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/approve_leave_request/approve_leave_page.dart" afterPath="$PROJECT_DIR$/lib/ui/approve_leave_request/approve_leave_page.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/dashboard_page/components/applies_leave_list.dart" afterPath="$PROJECT_DIR$/lib/ui/dashboard_page/components/applies_leave_list.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/dashboard_page/components/profile_header_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/dashboard_page/components/profile_header_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/home_page/components/base_fragment_container.dart" afterPath="$PROJECT_DIR$/lib/ui/home_page/components/base_fragment_container.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/home_page/components/extended_fab_widget.dart" afterPath="$PROJECT_DIR$/lib/ui/home_page/components/extended_fab_widget.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/home_page/components/menu_controller.dart" afterPath="$PROJECT_DIR$/lib/ui/home_page/components/menu_controller.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/home_page/components/setting_page.dart" afterPath="$PROJECT_DIR$/lib/ui/home_page/components/setting_page.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/signin_page/components/app_logo.dart" afterPath="$PROJECT_DIR$/lib/ui/signin_page/components/app_logo.dart" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/signin_page/signin_page.dart" afterPath="$PROJECT_DIR$/lib/ui/signin_page/signin_page.dart" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" afterPath="$PROJECT_DIR$/pubspec.lock" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" afterPath="$PROJECT_DIR$/pubspec.yaml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -70,8 +52,8 @@
       <file leaf-file-name="app_logo.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/ui/signin_page/components/app_logo.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="479">
-              <caret line="40" column="23" lean-forward="false" selection-start-line="40" selection-start-column="15" selection-end-line="40" selection-end-column="23" />
+            <state relative-caret-position="287">
+              <caret line="28" column="55" lean-forward="true" selection-start-line="28" selection-start-column="55" selection-end-line="28" selection-end-column="55" />
               <folding />
             </state>
           </provider>
@@ -587,7 +569,21 @@
       <option name="project" value="LOCAL" />
       <updated>1540498178226</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Adding the date login and calender blocking for public holiday">
+      <created>1540552359191</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1540552359191</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Adding the date login and calender blocking for public holiday">
+      <created>1540552403796</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1540552403796</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TodoView">
@@ -649,7 +645,8 @@
     <MESSAGE value="Added the readme description." />
     <MESSAGE value="Added a leave calender logic for the weekends and public holidays" />
     <MESSAGE value="Adding the onBoarding images" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding the onBoarding images" />
+    <MESSAGE value="Adding the date login and calender blocking for public holiday" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding the date login and calender blocking for public holiday" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -783,6 +780,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="483">
           <caret line="104" column="170" lean-forward="false" selection-start-line="104" selection-start-column="170" selection-end-line="104" selection-end-column="170" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -822,6 +820,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1218">
           <caret line="15" column="2" lean-forward="false" selection-start-line="15" selection-start-column="2" selection-end-line="15" selection-end-column="2" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -829,6 +828,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
           <caret line="20" column="54" lean-forward="false" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -856,6 +856,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="192">
           <caret line="12" column="61" lean-forward="false" selection-start-line="12" selection-start-column="61" selection-end-line="12" selection-end-column="61" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -884,6 +885,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="332">
           <caret line="45" column="34" lean-forward="false" selection-start-line="45" selection-start-column="34" selection-end-line="45" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -898,6 +902,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="320">
           <caret line="20" column="48" lean-forward="false" selection-start-line="20" selection-start-column="48" selection-end-line="20" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -905,6 +910,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-469">
           <caret line="64" column="65" lean-forward="false" selection-start-line="64" selection-start-column="65" selection-end-line="64" selection-end-column="65" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -912,6 +918,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="250">
           <caret line="83" column="47" lean-forward="false" selection-start-line="83" selection-start-column="47" selection-end-line="83" selection-end-column="47" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -947,6 +954,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -961,6 +969,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
           <caret line="207" column="29" lean-forward="false" selection-start-line="207" selection-start-column="29" selection-end-line="207" selection-end-column="29" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1066,8 +1075,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/ui/signin_page/components/app_logo.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="479">
-          <caret line="40" column="23" lean-forward="false" selection-start-line="40" selection-start-column="15" selection-end-line="40" selection-end-column="23" />
+        <state relative-caret-position="287">
+          <caret line="28" column="55" lean-forward="true" selection-start-line="28" selection-start-column="55" selection-end-line="28" selection-end-column="55" />
           <folding />
         </state>
       </provider>
