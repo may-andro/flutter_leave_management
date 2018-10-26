@@ -28,7 +28,10 @@ flutter:
     - assets/home.jpeg
     - assets/mutualmobile.png
 
-    - assets/images/owl.png
+    - assets/images/deer.png
     - assets/images/page1.webp
     - assets/images/page2.webp
     - assets/images/page3.webp
+    - assets/images/home.png
+    - assets/images/tree.jpg
+    - assets/images/car.jpg

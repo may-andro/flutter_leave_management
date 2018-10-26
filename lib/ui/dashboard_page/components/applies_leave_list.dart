@@ -102,7 +102,7 @@ class ListItemWidget extends StatelessWidget {
           ),
           subtitle: new Padding(
             padding: new EdgeInsets.only(top: 5.0),
-            child: new Text(
+            child: new Text( leave.isSingleDayLeave ? "${DateFormat.MMMMd().format(DateTime.fromMicrosecondsSinceEpoch(leave.startDate.millisecondsSinceEpoch * 1000))}" :
               "${DateFormat.MMMMd().format(DateTime.fromMicrosecondsSinceEpoch(leave.startDate.millisecondsSinceEpoch * 1000))} - ${DateFormat.MMMMd().format(DateTime.fromMicrosecondsSinceEpoch(leave.endDate.millisecondsSinceEpoch * 1000))}",
               style: TextStyles.captionStyle,
             ),

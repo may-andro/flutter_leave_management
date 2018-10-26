@@ -81,7 +81,7 @@ class ArcBannerImage extends StatelessWidget {
     return ClipPath(
         clipper: ArcClipper(),
         child: Container(
-          color: Colors.deepPurple,
+          color: Theme.of(context).primaryColor,
           width: screenWidth,
           height: 100.0,
           child: Center(

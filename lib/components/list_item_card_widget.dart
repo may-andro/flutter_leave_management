@@ -17,9 +17,9 @@ class ListItemWidget extends StatelessWidget {
       this.subtitle, this.leadingWidget,
       this.trailingWidget, this.clickCallback, this.animationReveal, this.dismissCallback, this.isDraggable, this.isSelected);
 
-  BoxDecoration _buildShadowAndRoundedCorners() {
+  BoxDecoration _buildShadowAndRoundedCorners(BuildContext context) {
     return BoxDecoration(
-      color: Colors.blueGrey,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(4.0),
       boxShadow: <BoxShadow>[
         BoxShadow(
@@ -43,15 +43,15 @@ class ListItemWidget extends StatelessWidget {
         onDismissed: (direction) {
           dismissCallback(objectType);
         },
-        child: createChild(),
+        child: createChild(context),
       );
     } else {
-      return createChild();
+      return createChild(context);
     }
   }
 
 
-  Widget createChild(){
+  Widget createChild(BuildContext context){
     return Opacity(
       opacity: animationReveal != null ? animationReveal.value : 1.0,
       child: Container(
@@ -59,7 +59,7 @@ class ListItemWidget extends StatelessWidget {
         margin: EdgeInsets.symmetric(
             horizontal: ( animationReveal != null ? animationReveal.value * 12.0 : 12.0),
             vertical: animationReveal != null ? animationReveal.value * 4.0 : 4.0),
-        decoration: _buildShadowAndRoundedCorners(),
+        decoration: _buildShadowAndRoundedCorners(context),
         child: ListTile(
           title: Text(
             title,

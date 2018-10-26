@@ -50,12 +50,15 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
         Container(
           color: Colors.transparent,
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                AppLogoWidget(controller: _controller),
-                LoginFormWidget(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.only(top: 30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  AppLogoWidget(controller: _controller),
+                  LoginFormWidget(),
+                ],
+              ),
             ),
           ),
         )

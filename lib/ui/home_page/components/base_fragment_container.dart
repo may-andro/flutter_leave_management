@@ -61,7 +61,6 @@ class _BaseFragmentContainerWidgetState
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        color: Colors.deepPurple,
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

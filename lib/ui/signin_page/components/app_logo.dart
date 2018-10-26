@@ -48,7 +48,7 @@ class CircularPainter extends CustomPainter {
     Offset center  = new Offset(size.width/2, size.height/2);
     double radius  = min(size.width/2,size.height/2);
     Paint complete = new Paint()
-      ..color = Colors.white
+      ..color = Colors.black
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;

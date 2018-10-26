@@ -39,7 +39,6 @@ class MenuController extends ChangeNotifier {
   }
 
   get percentOpen {
-    print('MenuController.percentOpen _animationController.value ${_animationController.value}');
     return _animationController.value;
   }
 

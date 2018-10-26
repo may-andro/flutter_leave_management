@@ -62,7 +62,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                         child: Text(
                           "${viewModel.user.remainingLeaves}",
                           style: TextStyle(
-                            color: Colors.deepPurple,
+                            color: Theme.of(context).primaryColor,
                             letterSpacing: 1.2,
                             fontStyle: FontStyle.normal,
                             fontWeight: FontWeight.w400,

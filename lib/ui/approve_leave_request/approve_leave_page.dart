@@ -203,9 +203,23 @@ void sendNotification(
     await Firestore.instance.collection('leaveCollection').document(leaveId).updateData({
       "status": isApproved ? 1 : 2,
     });
+
+    /*QuerySnapshot querySnapshot = await Firestore.instance
+        .collection('leaveCollection')
+        .where('mmid', isEqualTo: '$savedMmid')
+        .getDocuments();
+
+
+    var totalLeaves = await Firestore.instance.collection('leaveCollection').document(leaveId).get();
+    totalLeaves.data.
+
+    if(isApproved) {
+      await Firestore.instance.collection('userCollection').document(leaveId).updateData({
+        "remainingLeaves": user.remainingLeaves - ,
+      });
+    }*/
   });
-  
-  
+
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var fcm_token = prefs.getString(FIREBASE_FCM_TOKEN);
   var base = 'https://us-central1-mm-leavemanagement.cloudfunctions.net/';

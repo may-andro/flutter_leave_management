@@ -40,7 +40,7 @@ class _BackgroundWidgetState extends State<BackgroundWidget>
             child: Container(height: double.infinity),
           ),
           /*Image.asset(
-            'assets/reindeer.png',
+            'assets/images/car.jpg',
             color: Colors.brown,
             scale: 15.0,
           ),*/

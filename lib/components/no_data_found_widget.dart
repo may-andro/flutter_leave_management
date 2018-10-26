@@ -10,7 +10,7 @@ class NoDataFoundWidget extends StatelessWidget {
     return Center(
       child: Text(
         "$message",
-        style: TextStyle(color: Colors.deepOrange),
+        style: TextStyle(color: Theme.of(context).accentColor),
       ),
     );
   }

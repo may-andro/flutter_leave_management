@@ -81,7 +81,7 @@ class AppliedLeaveMiddleware extends MiddlewareClass<AppState> {
         '&fromPushId=$fcm_token'
         '&fromId=$leaveId'
         '&fromName=${user.name}'
-        '&fromMessage=${getLeaveMessage(leave.endDate.compareTo(leave.startDate), leave.endDate, leave.startDate, leave.message, leave.typeOfLeave, user.name)}'
+        '&fromMessage=${leave.message}'
         '&isApproved=false'
         '&type=leave_request';
     print(dataURL);

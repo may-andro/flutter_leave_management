@@ -18,7 +18,7 @@ class ExtendedFabWidget extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         icon: const Icon(Icons.add),
         label: Text(label),
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).buttonColor,
         onPressed: onPress,
         heroTag: null,
       ),
