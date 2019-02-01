@@ -5,6 +5,9 @@ When ever user wants to apply for leaves, all its manager will be fetched and a 
 Once user request for leave, all the manager gets a Notification in their app and choose to approve or decline.
 That status is updated on the user dashboard.
 
+## APP GIF
+![ezgif com-video-to-gif 3](https://user-images.githubusercontent.com/16761273/52124535-878dcd80-264f-11e9-9579-f692465e9b8c.gif)
+
 ## Getting Started
 
 For help getting started with Flutter, view
